@@ -1,0 +1,38 @@
+if ARCH_GRUS
+
+choice
+	prompt "grus board select"
+	optional
+	default TARGET_GRUS_FPGA_V1
+
+config TARGET_GRUS_BOOT
+	bool "GRUS BOOT"
+
+config TARGET_GRUS_BBT_V1
+	bool "GRUS BBT Device Board V1.0"
+
+config TARGET_GRUS_FPGA_V1
+	bool "GRUS FPGA Device Board V1.0"
+
+config TARGET_GRUS_GX8002T_DEV_V1
+	bool "GRUS GX8002T DEV Device Board V1.0"
+
+config TARGET_GRUS_GX8002_LOWPOWER_V1
+	bool "GRUS GX8002 Lowpower Device Board V1.0"
+
+config TARGET_GRUS_GX8002_LVP_V1
+	bool "GRUS GX8002 LVP Solution Device Board V1.0"
+
+endchoice
+
+config SYS_SOC
+	default "grus"
+
+source "board/nationalchip/grus_boot/Kconfig"
+source "board/nationalchip/grus_bbt_1v/Kconfig"
+source "board/nationalchip/grus_fpga_1v/Kconfig"
+source "board/nationalchip/grus_gx8002t_dev_1v/Kconfig"
+source "board/nationalchip/grus_gx8002_lowpower_1v/Kconfig"
+source "board/nationalchip/grus_gx8002_lvp_1v/Kconfig"
+
+endif

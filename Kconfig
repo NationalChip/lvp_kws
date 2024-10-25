@@ -1,0 +1,532 @@
+# Low-Power Voice Process
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Top Level Kconfig
+#
+#---------------------------------------------------------------------------------#
+
+mainmenu "NationalChip Low-Power Voice Process Configuration"
+
+# Targets
+choice
+    prompt "Chipset Family selects:"
+    default GX8002
+
+    config GX8002
+        bool "Grus Family [GX8002]"
+endchoice
+
+if GX8002
+    choice
+        prompt "Chipset Type selects:"
+        default GX8002B
+
+        config GX8002A
+            bool "Grus Type GX8002A"
+
+        config GX8002B
+            bool "Grus Type GX8002B"
+
+        config GX8002C
+            bool "Grus Type GX8002C"
+    endchoice
+endif
+
+choice
+    prompt "Boot selects:"
+    default BOOT_BY_FLASH
+
+    config BOOT_BY_UART
+        bool "Boot by Uart"
+
+    config BOOT_BY_UART_SPI
+        bool "Boot by Uart and SPI"
+
+    config BOOT_BY_FLASH
+        depends on GX8002B || GX8002A
+        bool "Boot by Flash"
+endchoice
+
+source "arch/Kconfig"
+source "boards/Kconfig"
+
+comment ""
+
+menuconfig BOARD_SUPPORT_MULTIBOOT
+    bool "Enable Multi-Boot"
+if BOARD_SUPPORT_MULTIBOOT
+    choice
+        prompt "is first or second bin"
+            default MULTIBOOT_FIRST_BIN
+        config MULTIBOOT_FIRST_BIN
+            bool "first bin"
+        config MULTIBOOT_SECOND_BIN
+            bool "second bin"
+    endchoice
+    config SECOND_BIN_OFFSET
+        hex "second bin offset"
+        default 0x0
+    config SECOND_BIN_STAGE2_BIN_SIZE
+        hex "second bin stage2 size text + data"
+        default 0x0
+    config SECOND_BIN_NPU_SRAM_SIZE_KB
+        int "Second Bin Sram kept for NPU (KBytes)"
+        default 0
+endif
+
+menu "MCU settings"
+
+config MCU_ENABLE_PRINTF
+    bool "Enable Uart printf(...)"
+    default y
+
+if MCU_ENABLE_PRINTF
+    comment "Not become effective, if not enable any uart port !"
+endif
+
+config MCU_ENABLE_FLOAT_PRINTF
+    depends on MCU_ENABLE_PRINTF
+    bool "Enable Float printf"
+    default n
+
+if MCU_ENABLE_PRINTF && (BOARD_HAS_UART0 || BOARD_HAS_UART1)
+choice
+    prompt "Uart Port for prinf"
+    default MCU_PRINT_UART_PORT_1
+
+    config MCU_PRINT_UART_PORT_0
+        bool "UART 0"
+        depends on BOARD_HAS_UART0
+
+    config MCU_PRINT_UART_PORT_1
+        bool "UART 1"
+        depends on BOARD_HAS_UART1
+
+endchoice
+endif
+
+comment ""
+
+choice
+    prompt "Build Schema"
+    default MCU_BUILD_SCHEMA_RELEASE
+
+    config MCU_BUILD_SCHEMA_DEBUG
+        bool "Debug (-O0 -g)"
+
+    config MCU_BUILD_SCHEMA_RELEASE
+        bool "Release (-O2)"
+
+    config MCU_BUILD_SCHEMA_OPTIMIZED_SPEED
+        bool "Optimized for Speed (-O3)"
+
+    config MCU_BUILD_SCHEMA_OPTIMIZED_SIZE
+        bool "Optimized for Size (-Os)"
+endchoice
+
+config MCU_ENABLE_JTAG_DEBUG
+    bool "Enbale JTAG debug"
+    default n
+    help
+      Don't dump binary.
+
+comment ""
+
+
+config MCU_ENABLE_DYNAMICALLY_ADJUSTMENT_CPU_FREQUENCY
+    bool "Enable Dynamically Adjustment Cpu Frequency"
+    depends on STANDARD_FREQUENCY
+    default n
+    config CPU_MAX_FREQUENCY
+        depends on MCU_ENABLE_DYNAMICALLY_ADJUSTMENT_CPU_FREQUENCY
+        int "CPU Maxmum Frequency[Only Support 4,6,8,12,24]"
+        default 8
+
+    config CPU_MINI_FREQUENCY
+        depends on MCU_ENABLE_DYNAMICALLY_ADJUSTMENT_CPU_FREQUENCY
+        int "CPU Minimum Frequency[Only Support 4,6,8,12,24]"
+        default 4
+        range 4 CPU_MAX_FREQUENCY
+
+comment ""
+
+config MCU_MAIN_STACK_SIZE
+    int "MAIN Stack Minimum Size (KBytes)"
+    default 2
+    range 1 40
+
+config MCU_ENABLE_STACK_MONITORING
+    bool "Enable Stack Monitoring"
+    default n
+
+    config DL
+        bool "Dynamic Program Load support (Need External Spi Flash)"
+        ---help---
+            If you say Y here, you will enable support for Dynamic Program Load.
+
+    config PAGEFRAME_NR
+        int "Page frame number reserved for DL"
+        depends on DL
+        default 2
+        ---help---
+            Page frame number
+
+comment ""
+
+config MCU_ENABLE_XIP
+    bool "Enable XIP"
+    default n
+    help
+      Run in nor flash directly by xip. Please use V3.8.12+ toolchain
+
+if MCU_ENABLE_XIP
+choice
+    prompt "XIP Strategy"
+
+    config MCU_DEFAULT_TEXT_IN_SRAM
+        bool "Default Text In Sram"
+        help
+          The .text .rodata .sram.text and .sram.rodata are placed in sram.
+          The .xip.text and .xip.rodata are placed in flash.
+
+    config MCU_DEFAULT_TEXT_IN_FLASH
+        bool "Default Text In Flash"
+        help
+          The .text .rodata .xip.text and .xip.rodata are placed in flash
+          The .sram.text and .sram.rodata are placed in sram.
+endchoice
+
+    config NPU_RUN_IN_FLASH
+        bool "NPU Run In Flash"
+        default n
+endif
+
+comment ""
+choice
+    prompt "System Counter selects:"
+    default SYSTICK_COUNTER
+
+    config SYSTICK_COUNTER
+        bool "systick_counter, lower power consumption"
+
+    config GX_COUNTER
+        bool "gx_counter, accurater"
+endchoice
+
+comment ""
+config MCU_COMPILE_MATH_LIB_FROM_SOURCE_CODE
+    bool "Build CSKY Math Lib From Source Code"
+    default n
+    help
+        Do not support fft1024 fft2048 fft4096
+
+comment ""
+    config LVP_USE_BUFFER_V2
+        bool "Select Buffer Management V2"
+        default n
+        help
+            LVP USE BUFFER V2
+
+config MCU_SUPPORT_HEAP
+    bool "Enable MCU support heap"
+    default n
+
+config HEAP_SIZE_KB
+    depends on MCU_SUPPORT_HEAP
+    int "HEAP SIZE (KBytes)"
+    default 68
+endmenu # MCU settings
+
+menu "NPU settings"
+
+config NPU_SRAM_SIZE_KB
+    int "Sram kept for NPU (KBytes)"
+    default 128
+
+comment ""
+
+config ENABLE_NPU_DEBUG
+    bool "Enable Npu Debug (Open Printf)"
+    default n
+
+comment ""
+
+config ENABLE_DATA_PREPARATION_CYCLE_STATISTIC
+    bool "Enable Data Preparation Cycle Statistic"
+    default n
+
+config ENABLE_NPU_CYCLE_STATISTIC
+    bool "Enable Npu Cycle Statistic"
+    default n
+
+config ENABLE_CTC_SOFTMAX_CYCLE_STATISTIC
+    bool "Enable CTC Softmax Cycle Statistic"
+    default n
+
+config ENABLE_CTC_DECODER_CYCLE_STATISTIC
+    bool "Enable CTC Decoder Cycle Statistic"
+    default n
+
+config ENABLE_BM_CYCLE_STATISTIC
+    bool "Enable BM Cycle Statistic"
+    default n
+
+endmenu # NPU settings
+
+menu "Frequency settings"
+
+choice
+    prompt "System Frequency selects:"
+    default STANDARD_FREQUENCY
+
+    config STANDARD_FREQUENCY
+        bool "Standard Speed"
+
+    config HIGH_FREQUENCY
+        bool "High Speed"
+        select ENABLE_PLL_FREQUENCY_HIGH
+
+    config CUSTOMIZE_FREQUENCY
+        bool "Customize"
+
+endchoice
+
+if STANDARD_FREQUENCY
+    comment "|"
+    comment "|--> MCU 8M; SRAM 8M; NPU 8M; Flash 24M"
+    if !MCU_ENABLE_XIP
+        comment "|"
+        comment "'--> Dig LDO voltage: 0.924V"
+    endif
+    if MCU_ENABLE_XIP
+        comment "|"
+        comment "'--> Dig LDO voltage: 0.924V"
+    endif
+
+
+endif
+
+if HIGH_FREQUENCY
+    comment "|"
+    comment "|--> MCU 24M; SRAM 24M; NPU 24M; Flash 50M"
+    comment "|"
+    comment "'--> Dig LDO voltage: 0.950V"
+endif
+
+config ENABLE_PLL_FREQUENCY_HIGH
+    bool
+
+
+if CUSTOMIZE_FREQUENCY
+
+    if ENABLE_BYPASS_CORE_LDO
+        comment ""
+        comment ".____________________________/Warning\\_____________________________"
+        comment "!                                                                   |"
+        comment "!             Because of enabled bypass core-LDO                      "
+        comment "!  Please make sure the voltage entering core less or equal 1.2v        "
+        comment "!              to avoid burning chip !!!!!!!!                      "
+        comment "!                                                                  "
+        if NPU_FREQUENCY_50M
+        comment "!             Because of NPU run at 50MHz         "
+        comment "!  Please make sure the voltage entering core greater or equal 1.1v! "
+        endif
+        comment "!___________________________________________________________________|"
+        comment "!"
+    endif
+
+
+    config ENABLE_BYPASS_CORE_LDO
+        bool "|Enable bypass core ldo"
+        default n
+
+    if !ENABLE_BYPASS_CORE_LDO
+        config CUSTOMIZE_CORE_LDO_VOLTAGE
+            bool "Set core ldo voltage"
+            default n
+
+
+        if !CUSTOMIZE_CORE_LDO_VOLTAGE
+            if ENABLE_PLL_FREQUENCY_HIGH
+                comment "|"
+                comment "'-Dig LDO Voltage: 0.950V"
+            endif
+
+            if !ENABLE_PLL_FREQUENCY_HIGH
+                    comment "|"
+                    comment "'-Dig LDO Voltage: 0.924V"
+            endif
+        endif
+
+        if CUSTOMIZE_CORE_LDO_VOLTAGE
+            choice
+                prompt "Dig LDO Voltage:"
+                default CORE_LDO_VOLTAGE_950_MV
+
+                config CORE_LDO_VOLTAGE_950_MV
+                    bool "950 mV"
+
+                config CORE_LDO_VOLTAGE_924_MV
+                    bool "924 mV"
+
+                config CORE_LDO_VOLTAGE_897_MV
+                    bool "897 mV"
+
+                config CORE_LDO_VOLTAGE_871_MV
+                    bool "871 mV"
+
+                config CORE_LDO_VOLTAGE_845_MV
+                    bool "845 mV"
+
+                config CORE_LDO_VOLTAGE_819_MV
+                    bool "819 mV"
+
+                config CORE_LDO_VOLTAGE_792_MV
+                    bool "792 mV"
+
+                config CORE_LDO_VOLTAGE_766_MV
+                    bool "766 mV"
+
+                config CORE_LDO_VOLTAGE_740_MV
+                    bool "740 mV"
+
+                config CORE_LDO_VOLTAGE_714_MV
+                    bool "714 mV"
+
+                config CORE_LDO_VOLTAGE_687_MV
+                    bool "687 mV"
+
+                config CORE_LDO_VOLTAGE_661_MV
+                    bool "661 mV"
+
+            endchoice
+        endif
+    endif
+
+    comment ""
+
+    choice
+        prompt "MCU Work Frequency:"
+        default MCU_FREQUENCY_8M
+
+        config MCU_FREQUENCY_1M
+            bool "1M"
+
+        config MCU_FREQUENCY_2M
+            bool "2M"
+
+        config MCU_FREQUENCY_4M
+            bool "4M"
+
+        config MCU_FREQUENCY_8M
+            bool "8M"
+
+        config MCU_FREQUENCY_12M
+            bool "12M"
+
+        config MCU_FREQUENCY_16M
+            bool "16M"
+            select ENABLE_PLL_FREQUENCY_HIGH
+
+        config MCU_FREQUENCY_24M
+            bool "24M"
+
+        config MCU_FREQUENCY_50M
+            bool "50M"
+            select ENABLE_PLL_FREQUENCY_HIGH
+            select ENABLE_BYPASS_CORE_LDO
+    endchoice
+
+
+    choice
+        prompt "NPU Work Frequency:"
+        default NPU_FREQUENCY_8M
+
+        config NPU_FREQUENCY_8M
+            bool "8M"
+
+        config NPU_FREQUENCY_12M
+            bool "12M"
+
+        config NPU_FREQUENCY_24M
+            bool "24M"
+
+        config NPU_FREQUENCY_50M
+            bool "50M"
+            select ENABLE_PLL_FREQUENCY_HIGH
+            select ENABLE_BYPASS_CORE_LDO
+    endchoice
+
+    choice
+        prompt "SRAM Work Frequency:"
+        default SRAM_FREQUENCY_8M
+
+        config SRAM_FREQUENCY_8M
+            bool "8M"
+
+        config SRAM_FREQUENCY_12M
+            bool "12M"
+
+        config SRAM_FREQUENCY_24M
+            bool "24M"
+
+    endchoice
+
+    choice
+        prompt "Flash Work Frequency:"
+        default FLASH_FREQUENCY_24M
+
+        config FLASH_FREQUENCY_24M
+            bool "24M"
+
+        config FLASH_FREQUENCY_50M
+            bool "50M"
+            select ENABLE_PLL_FREQUENCY_HIGH
+    endchoice
+if ENABLE_PLL_FREQUENCY_HIGH
+    choice
+    prompt "PLL Frequency"
+    default ENABLE_PLL_FREQUENCY_50M
+
+        config ENABLE_PLL_FREQUENCY_50M
+            bool "50MHz"
+
+        config ENABLE_PLL_FREQUENCY_48M
+            bool "48MHz"
+    endchoice
+endif
+
+endif
+endmenu # Frequency settings
+
+comment ""
+
+source lvp/Kconfig
+source lvp/vui/Kconfig
+
+comment ""
+
+source "app/Kconfig"
+
+comment ""
+
+source "lvp/common/Kconfig"
+
+comment ""
+
+menu "Object Info"
+    config SOFT_VERSTION
+        string "Soft Verstion"
+        default "0.0.0.1"
+        help
+            "Set Soft Verstion,eg:1.2.3.4"
+
+    config PROJECT_NAME
+        string "Project Name, The firmware package is named accordingly"
+        default "Demo"
+        help
+            "The firmware package is named accordingly"
+
+endmenu
+#---------------------------------------------------------------------------------#

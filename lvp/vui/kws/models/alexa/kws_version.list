@@ -1,0 +1,14 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2019 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: One KeyWord Name For ../Kconfig
+#---------------------------------------------------------------------------------#
+
+choice
+    prompt "Model select:"
+    default LVP_KWS_EN_KWS_V0DOT1DOT1_2020_0901
+    depends on LVP_KWS_ALEXA
+
+    source "lvp/vui/kws/models/alexa/*/kws_version.name"
+endchoice

@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# app.name
+#
+#---------------------------------------------------------------------------------#
+
+config LVP_APP_FFT_RECOVER_DEMO
+    bool "FFT recover Demo App"
+    help

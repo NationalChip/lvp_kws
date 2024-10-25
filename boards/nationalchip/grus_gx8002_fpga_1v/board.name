@@ -1,0 +1,3 @@
+config BOARD_GX8002_FPGA_V1
+    bool "GX8002 FPGA Board V1.0"
+    depends on GX8002 && BOARD_VENDOR_NATIONALCHIP

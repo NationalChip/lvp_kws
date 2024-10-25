@@ -1,0 +1,61 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig
+#
+#
+#---------------------------------------------------------------------------------#
+
+if BOARD_GX8002_SLIGHT_V1
+
+config BOARD_MODEL
+    default "grus_gx8002_slight_1v"
+
+config BOARD_VENDOR
+    default "nationalchip"
+
+config SYS_CONFIG_NAME
+    default "grus_gx8002_slight_1v"
+
+#-------------------------------------------------#
+# Board Version
+
+choice
+    prompt "Board version selects: "
+
+    config BOARD_GX8002_SLIGHT_4KEY_1V0
+        bool "SLIGHT_4KEY_1V0"
+    config BOARD_GX8002_SLIGHT_6KEY_1V0
+        bool "SLIGHT_6KEY_1V0"
+
+endchoice
+
+#-------------------------------------------------#
+# MIC Number Setting
+config BOARD_MIC_NUM
+    default 1
+
+#-------------------------------------------------#
+config LVP_BUFFER_HAS_MIC
+    default y
+
+config LVP_BUFFER_HAS_REF
+    default n
+
+config LVP_BUFFER_HAS_FFT
+    default n
+
+config LVP_BUFFER_HAS_LOGFBANK
+    default y
+
+config LVP_BUFFER_HAS_OUTPUT
+    default n
+
+config LVP_HAS_STANDBY
+    default y
+
+endif
+
+
+#---------------------------------------------------------------------------------#

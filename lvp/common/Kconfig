@@ -1,0 +1,239 @@
+#
+# Grus
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Common function Kconfig
+#---------------------------------------------------------------------------------#
+
+menu "Common Function Settings"
+
+#---------------------------------------------------------------------------------#
+    menuconfig LVP_HAS_UART_MESSAGE_2_0
+        bool "Has Uart protocol Message2.0"
+        default y
+        help
+            If you need Uart Message2.0, say Y here!
+
+    if LVP_HAS_UART_MESSAGE_2_0
+        choice
+            prompt "Select Uart port for protocol:"
+            default UART_MESSAGE_PORT_BOTH
+
+            config UART_MESSAGE_PORT_0
+            bool "Uart 0"
+
+            config UART_MESSAGE_PORT_1
+            bool "Uart 1"
+
+            config UART_MESSAGE_PORT_BOTH
+            bool "Both Uart 0 and Uart 1"
+
+        endchoice
+
+        config LVP_UART_MESSAGE_SEND_Q_LEN
+            int "Send Queue Length"
+            default 8
+
+        config LVP_UART_MESSAGE_RECV_Q_LEN
+            int "Recv Queue Length"
+            default 8
+
+        config LVP_UART_MESSAGE_SEND_REGIST_NUM
+            int "The num of Rend callback registed"
+            default 6
+
+        config LVP_UART_MESSAGE_RECV_REGIST_NUM
+            int "The num of Recv callback registed"
+            default 16
+    endif
+
+
+    menuconfig LVP_HAS_UART_RECORD
+        bool "Has Uart Record"
+        default y
+        help
+            If the board you choose can record by uart, say Y here!
+
+    if LVP_HAS_UART_RECORD
+        config LVP_UART_RECORD_PORT
+            int "Uart port"
+            default 0
+
+        config LVP_UART_RECORD_PORT_BAUDRATE
+            int "Uart baudrate"
+            default 500000
+
+        config LVP_ENABLE_G_SENSOR_RECORD
+            bool "Enable g_sensor data record"
+            depends on LVP_HAS_G_SENSOR_DEVICE
+            default n
+    endif
+
+    config UART_RECORD_ENABLE
+        bool "Enable uart record"
+        select LVP_HAS_UART_RECORD
+        default 0
+
+
+    menuconfig LVP_HAS_G_SENSOR_DEVICE
+        bool "Has G sensor device"
+        depends on LVP_HAS_G_SENSOR
+        default n
+
+    if LVP_HAS_G_SENSOR_DEVICE
+        source lvp/common/G_vad/Kconfig
+    endif
+
+    menuconfig LVP_HAS_VOICE_PLAYER
+        bool "Has voice player"
+        default n
+        help
+          If you need voice player workmode, say Y here!
+
+    if LVP_HAS_VOICE_PLAYER
+        config LVP_HAS_VOICE_PLAYER_SLAVE_MODE
+            bool "default MASTER mode, if you need SLAVE mode, say Y here"
+            default n
+    choice
+        prompt "select audio decoder"
+        default USE_NO_DECODER
+        config USE_NO_DECODER
+            bool "use no decoder"
+
+        config USE_OPUS
+            bool "use opus decoder"
+
+        config USE_AMR
+            bool "use amr decoder"
+
+        config USE_ADPCM
+            bool "use adpcm decoder"
+
+    endchoice
+        source "3rdparty/opus/Kconfig"
+        source "3rdparty/opencore-amr/Kconfig"
+        if USE_OPUS || USE_AMR
+        comment "[WARNING] you should give more mem when encoded data decode failed or struck"
+        endif
+
+        config LVP_VOICE_PLAYER_NUTE_PIN
+            int "Mute pin"
+            default 2
+        choice
+            prompt "dac channel select"
+            default VOICE_PLAYER_DAC_STEREO
+            config VOICE_PLAYER_DAC_STEREO
+                bool "stereo"
+            config VOICE_PLAYER_DAC_LEFT
+                bool "left"
+            config VOICE_PLAYER_DAC_RIGHT
+                bool "right"
+            config VOICE_PLAYER_DAC_MONO
+                bool "mono"
+        endchoice
+    endif
+
+    menuconfig LVP_HAS_MP3_PLAYER
+        bool "Has mp3 player"
+        default n
+        help
+          If you need mp3 player workmode, say Y here!
+
+    if LVP_HAS_MP3_PLAYER
+        config CONFIG_LVP_HAS_MP3_PLAYER_SLAVE_MODE
+            bool "default MASTER mode, if you need SLAVE mode, say Y here"
+            default n
+
+        config USE_MP3
+            bool
+            default y
+
+        config LVP_MP3_PLAYER_NUTE_PIN
+            int "Mute pin"
+            default 2
+
+        choice
+            prompt "dac channel select"
+            default MP3_DAC_STEREO
+            config MP3_DAC_STEREO
+                bool "stereo"
+            config MP3_DAC_LEFT
+                bool "left"
+            config MP3_DAC_RIGHT
+                bool "right"
+            config MP3_DAC_MONO
+                bool "mono"
+        endchoice
+    endif
+
+    config LVP_FACTORY_MIC_TEST
+        bool "Has factory mic test"
+        default n
+
+    menuconfig LVP_ENABLE_IDLE_CTRL
+        bool "Enable Idle controller"
+        default n
+
+    if LVP_ENABLE_IDLE_CTRL
+        config LVP_IDLE_CTRL_THRESHOLD
+        int "Idle controller threshold (ms)"
+        default 200
+        help
+            Higher, easier to idle.
+    endif
+
+    menuconfig ENABLE_CACULATE_STANDBY_RATIO
+        bool "Enable Caculate Standby Ratio"
+        default n
+
+    if ENABLE_CACULATE_STANDBY_RATIO
+        config CACULATE_STANDBY_RATIO_WINDOW_LENGTH
+            int "Standby Ratio Window Length (Second)"
+            default 60
+        config CACULATE_STANDBY_RATIO_UPDATE_FREQUENCY
+            int "Update The Frequency Of Caculate Standby Ratio (Second)"
+            default 4
+        config CACULATE_STANDBY_RATIO_THRESHOLD
+            int "Standby Ratio Threshold (x1000)"
+            default 100
+            help
+                You can use this threshold to do what you want, such as judging whether it is a high noisy environment
+    endif
+
+
+    menuconfig LVP_HAS_LEO_MINI_UART_UPGRADE
+        bool "Has Leo Mini Uart Upgrade"
+        default n
+        help
+          If you need leo mini uart upgrade workmode, say Y here!
+
+    menuconfig LVP_HAS_WATCHDOG
+        bool "Has watchdog"
+        default n
+        help
+          If you need watchdog, say Y here!
+
+    if LVP_HAS_WATCHDOG
+
+        config LVP_HAS_WATCHDOG_RESET_MS
+            int "Reset Time (ms)"
+            default 3000
+
+        config LVP_HAS_WATCHDOG_TIMEOUT_MS
+            int "Time Out IRQ (ms)"
+            default 2999
+
+        config LVP_HAS_WATCHDOG_TICK_BLOCK
+            bool "Reset when tick block"
+            default y
+            help
+                If say no, will reset when IRQ block.
+
+    endif
+
+
+endmenu
+
+#---------------------------------------------------------------------------------#
+

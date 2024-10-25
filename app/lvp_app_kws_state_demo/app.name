@@ -1,0 +1,13 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# app.name
+#
+#---------------------------------------------------------------------------------#
+
+config LVP_APP_KWS_STATE_DEMO
+    bool "Kws State Demo App"
+    help
+        "Detail:"
+

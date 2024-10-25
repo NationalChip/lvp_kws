@@ -1,0 +1,16 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig:
+#
+#---------------------------------------------------------------------------------#
+
+if LVP_APP_XIP_DEMO
+
+    config LVP_APP_XIP_DEMO_RODATA
+        bool ".xip.rodata"
+        default y
+endif
+
+

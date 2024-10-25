@@ -1,0 +1,76 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2019 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: KWS Kconfig
+#---------------------------------------------------------------------------------#
+
+choice
+    prompt "KeyWord select:"
+    default LVP_KWS_XIAO_DU_XIAO_DU
+
+    source "lvp/vui/kws/models/*/kws.name"
+endchoice
+
+# kws version list
+source "lvp/vui/kws/models/*/kws_version.list"
+# kws model param kconfig
+source "lvp/vui/kws/models/*/*/Kconfig"
+# kws list
+source "lvp/vui/kws/models/*/*/kws.list"
+
+if KWS_TYPE_HYBRID
+    config KWS_TYPE_HYBRID_SWITCH_BY_ENV_NOISE
+        bool "Switch Model by Environment Noise"
+        default y
+        select ENABLE_PLL_FREQUENCY_50M
+        select ENABLE_NOISE_JUDGEMENT
+
+    config KWS_TYPE_HYBRID_SWITCH_BY_KWS_STATE
+        bool "Switch Model by Kws State"
+        default n
+endif
+
+choice
+    prompt "CTC Score Version"
+    default USE_CTC_VERSION_V0DOT0DOT1
+    config USE_CTC_VERSION_V0DOT0DOT1
+        bool "CTC Score Version V0.1.1"
+
+    config USE_CTC_VERSION_V0DOT0DOT3
+        bool "CTC Score Version V0.1.3"
+endchoice
+
+config LVP_MODEL_USE_RNN
+    bool "Model Use Recurrent Neural Network"
+    default y
+
+config LVP_ENABLE_CTC_SCORE_COMPENSATOR
+    bool "Enable CTC Score Compensator"
+    default n
+
+config LVP_ENABLE_OPTIMIZE_SHORT_INSTRUCTIONS
+    bool "Enable Optimize short instructions"
+    default n
+
+config LVP_SHORT_INSTRUCTIONS_OFFSET
+    int "Short Instruction Offset"
+    depends on LVP_ENABLE_OPTIMIZE_SHORT_INSTRUCTIONS
+    default 0
+
+config LVP_ENABLE_BIONIC
+    bool "Enable BIONIC To Reduce False Activation"
+    default n
+config LVP_KWS_THRESHOLD_STEP
+    int "Threshold Step For Bionic(x10)"
+    depends on LVP_ENABLE_BIONIC
+    default 5
+config LVP_KWS_MAX_THRESHOLD_ADJUSTMENT_VALUE
+    int "Maximum Threshold Adjustment Value For Bionic(x10)"
+    depends on LVP_ENABLE_BIONIC
+    default 20
+config LVP_KWS_THRESHOLD_ADJUST_TIME
+    int "Threshold Adjust time For Bionic(Second)"
+    depends on LVP_ENABLE_BIONIC
+    default 500
+#---------------------------------------------------------------------------------#

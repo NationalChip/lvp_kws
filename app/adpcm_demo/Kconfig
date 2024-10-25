@@ -1,0 +1,41 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig:
+#
+#---------------------------------------------------------------------------------#
+
+if LVP_APP_ADPCM_DEMO
+    comment "NOTE:Audio Play and Record cannot be checked together"
+    config APP_UART_RECORD
+        bool "uart record"
+        select LVP_HAS_UART_RECORD
+        default n
+    config APP_AUDIO_PLAY
+        bool "audio play"
+        default y
+
+    if APP_AUDIO_PLAY
+        choice
+            prompt "audio play data choice"
+            config APP_PLAY_LOCAL_DATA
+                bool "play local data"
+
+            config APP_PLAY_MIC_DATA
+                bool "play mic data"
+        endchoice
+
+        choice
+            prompt "data type choice"
+            config APP_PLAY_PCM
+                bool "play pcm"
+            config APP_PLAY_ADPCM
+                bool "play adpcm"
+            help
+                "If you need to play ADPCM, select "Select Audio Decoder-> use adpcm decoder" in Voice Player"
+        endchoice
+    endif
+endif
+
+

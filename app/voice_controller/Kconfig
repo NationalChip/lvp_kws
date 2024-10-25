@@ -1,0 +1,60 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig:
+#
+#---------------------------------------------------------------------------------#
+
+if LVP_APP_VOICE_CONTROLLER
+
+    config APP_VC_UART
+        bool "by uart"
+
+    if APP_VC_UART
+        config APP_VC_UART_PORT
+        int "vc uart port"
+        default 0
+        range 0 1
+    endif
+
+    config APP_VC_HW_I2C
+        bool "by HW I2C"
+        select BOARD_HAS_HW_I2C
+
+    config APP_VC_HAS_LED
+        bool "has led"
+        default n
+
+    if APP_VC_HAS_LED
+        config APP_VC_LED_1_PIN_ID
+            int "LED 1 GPIO"
+            default 3
+        config APP_VC_LED_2_PIN_ID
+            int "LED 2 GPIO"
+            default 4
+    endif
+
+
+    config APP_VC_HAS_MESSAGE_NOTIFY_PIN
+        bool "has notify pin"
+        default y
+
+    if APP_VC_HAS_MESSAGE_NOTIFY_PIN
+        config APP_VC_MESSAGE_NOTIFY_PIN_ID
+        int "notify pin ID"
+        default 2
+    endif
+
+    choice
+        prompt "uart message config "
+        config APP_VC_UART_MESSAGE_QUERY_SUPPORTED
+            bool "Uart message query supported"
+
+        config APP_VC_UART_MESSAGE_NOTIFY_SUPPORTED
+            bool "Uart message notify supported"
+    endchoice
+
+endif
+
+

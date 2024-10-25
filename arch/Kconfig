@@ -1,0 +1,46 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Chipset setting
+#
+
+config MCU_ARCH
+    string
+    default "csky" if (GX8002)
+    help
+      This option should contain the architecture name to build the
+      appropriate arch/cpu/<CONFIG_MCU_ARCH> directory.
+      All the architectures should specify this option correctly.
+
+config MCU_TYPE
+    string
+    default "ck804" if (GX8002)
+    help
+      This option should contain the CPU name to build the correct
+      arch/cpu/<CONFIG_MCU_TYPE> directory.
+
+      This is optional.  For those targets without the CPU directory,
+      leave this option empty.
+
+config MCU_LINK_SCRIPT
+    string
+    help
+      This option should contain the MCU Link Script path.
+
+config SOC_MODEL
+    string
+    default "grus" if GX8002
+    help
+      This option should contain the SoC name to build the directory
+      arch/soc/<CONFIG_SOC_MODEL>.
+
+      This is optional.  For those targets without the SoC directory,
+      leave this option empty.
+
+config SOC_SRAM_SIZE_KB
+    int
+    help
+      This option describe the SRAM size in SOC.
+
+source "mcu/arch/soc/grus/Kconfig"

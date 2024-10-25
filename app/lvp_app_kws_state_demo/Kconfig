@@ -1,0 +1,40 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig:
+#
+#---------------------------------------------------------------------------------#
+
+if LVP_APP_KWS_STATE_DEMO
+
+    choice
+        prompt "MCU Work Low Frequency When MCU Is Not Wake:"
+        default MCU_LOW_FREQUENCY_8M
+
+        config MCU_LOW_FREQUENCY_4M
+            bool "4M"
+
+        config MCU_LOW_FREQUENCY_8M
+            bool "8M"
+
+        config MCU_LOW_FREQUENCY_12M
+            bool "12M"
+
+        config MCU_LOW_FREQUENCY_24M
+            bool "24M"
+    endchoice
+
+    config APP_VC_HAS_LED
+        bool "has led"
+        default n
+
+    if APP_VC_HAS_LED
+        config APP_VC_KWS_LED_PIN_ID
+            int "KWS LED GPIO"
+            default 3
+    endif
+
+endif
+
+

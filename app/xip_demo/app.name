@@ -1,0 +1,13 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# app.name
+#
+#---------------------------------------------------------------------------------#
+
+config LVP_APP_XIP_DEMO
+    bool "XIP Demo App"
+    help
+        "Detail:"
+

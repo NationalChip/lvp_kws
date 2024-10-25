@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Model Name
+#---------------------------------------------------------------------------------#
+
+config LVP_LM_DRYING_RACK_DEMO_V0DOT0DOT2_2021_1027
+    bool "LVP_LM_DRYING_RACK_DEMO_V0DOT0DOT2_2021_1027"
+
+#---------------------------------------------------------------------------------#

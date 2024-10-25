@@ -1,0 +1,11 @@
+# Grus
+# Copyright (C) 2001-2022 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: One KeyWord Name For ../Kconfig
+#---------------------------------------------------------------------------------#
+
+config LVP_LM_CURTAIN_DEMO_2
+    bool "curtain demo 2"
+
+#---------------------------------------------------------------------------------#

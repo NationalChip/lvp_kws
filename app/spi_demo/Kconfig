@@ -1,0 +1,13 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2022 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig:
+#
+#---------------------------------------------------------------------------------#
+
+if LVP_APP_SPI_DEMO
+
+endif
+
+

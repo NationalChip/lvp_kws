@@ -1,0 +1,171 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig
+#
+#
+#---------------------------------------------------------------------------------#
+
+if BOARD_GX8002B_DEBUG_V1
+
+config BOARD_MODEL
+    default "grus_gx8002b_debug_1v"
+
+config BOARD_VENDOR
+    default "nationalchip"
+
+config SYS_CONFIG_NAME
+    default "grus_gx8002b_debug_1v"
+
+#-------------------------------------------------#
+# Board Version
+
+choice
+    prompt "Board version selects: "
+
+    config BOARD_GX8002B_DEBUG_1V0
+        bool "V1.0"
+
+endchoice
+
+menu "Board Options: "
+comment "This Options depend PIN`s Function"
+comment "some options may be conflict             -WATCH OUT!-"
+comment "Select what you want"
+comment "-----------------------------------------------------"
+
+if BOARD_GX8002B_DEBUG_1V0
+
+    config BOARD_NO_DMIC
+        bool "Disable DMIC"
+        default n
+
+    config BOARD_HAS_JTAG
+        bool "Support JTAG"
+        default n
+
+    config BOARD_HAS_I2C0
+        bool "Support I2C0"
+        default n
+
+    config BOARD_HAS_HW_I2C
+        bool "Support HW I2C"
+        default n
+
+    config BOARD_HAS_I2C1
+        bool "Support I2C1"
+        default n
+
+    config BOARD_HAS_UART0
+        bool "Support UART0"
+        default n
+
+    menuconfig BOARD_HAS_UART1
+        bool "Support UART1"
+        default y
+        if BOARD_HAS_UART1
+            config BOARD_HAS_UART1_JUST_SUPPORT_PRINTF_LOG
+                bool "Just for print log"
+                default n
+        endif
+
+    config BOARD_HAS_SPI
+        bool "Support SPI"
+        default n
+
+    config BOARD_HAS_AIN_I2S_MASTER
+        bool "Support AudioIn Master mode"
+        default n
+
+    config BOARD_HAS_AIN_I2S_SLAVE
+        bool "Support AudioIn Slave mode"
+        default n
+
+    config BOARD_HAS_I2S_FIVE_WIRE_MODE
+        bool "Support I2S five wire mode, audio in I2S master + audio out I2S slave"
+        default n
+
+    config BOARD_HAS_AOUT_DAC_OUT
+        bool
+        default n
+endif
+
+if BOARD_GX8002B_DEBUG_1V1
+
+    config BOARD_NO_AMIC
+        bool
+        default n
+
+    config BOARD_NO_DMIC
+        bool
+        default n
+
+    config BOARD_HAS_HW_I2C
+        bool
+        default n
+
+    config BOARD_HAS_UART0
+        bool
+        default n
+
+    menuconfig BOARD_HAS_UART1
+        bool "Support UART1"
+        default y
+        if BOARD_HAS_UART1
+            config BOARD_HAS_UART1_JUST_SUPPORT_PRINTF_LOG
+                bool "Just for print log"
+                default n
+        endif
+
+    config BOARD_HAS_SPI
+        bool
+        default n
+
+    config BOARD_HAS_AIN_I2S_MASTER
+        bool
+        default n
+
+    config BOARD_HAS_AIN_I2S_SLAVE
+        bool
+        default n
+endif
+
+endmenu
+#-------------------------------------------------#
+# MIC Number Setting
+config BOARD_MIC_NUM
+    default 1
+
+#-------------------------------------------------#
+config LVP_BUFFER_HAS_MIC
+    default y
+
+config LVP_BUFFER_HAS_REF
+    default n
+
+config LVP_BUFFER_HAS_FFT
+    default n
+
+config LVP_BUFFER_HAS_LOGFBANK
+    default y
+
+config LVP_BUFFER_HAS_OUTPUT
+    default n
+
+config LVP_HAS_STANDBY
+    default y
+
+config LVP_HAS_G_SENSOR
+    default y
+
+config LVP_GSENSOR_USE_SPI
+    bool
+    default y
+
+config LVP_GSENSOR_USE_I2C
+    bool
+    default n
+endif
+
+#---------------------------------------------------------------------------------#

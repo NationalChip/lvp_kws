@@ -1,0 +1,13 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# app.name
+#
+#---------------------------------------------------------------------------------#
+
+config LVP_SPI_NAND_FLASH_SAMPLE_APP
+    bool "Spi Nand Flash Sample App"
+    help
+        "Detail:"
+

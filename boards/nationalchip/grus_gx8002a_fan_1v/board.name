@@ -1,0 +1,3 @@
+config BOARD_GX8002A_FAN_V1
+    bool "GX8002A FAN Board V1.0"
+    depends on GX8002A && BOARD_VENDOR_NATIONALCHIP

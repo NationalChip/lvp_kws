@@ -1,0 +1,25 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig:
+#
+#---------------------------------------------------------------------------------#
+
+if LVP_APP_VOICE_PLAYER
+
+choice
+prompt "use solution:"
+config PLAY_MIC_DATA
+    bool "play voice from mic"
+config PLAY_WAV_DATA
+    bool "play wav when kws_value == 100"
+config PLAY_OPUS_DATA
+    bool "play opus when kws_value == 100"
+config YILIAN_FAN_SOLUTION
+    bool "yilian fan solution"
+endchoice
+
+endif
+
+

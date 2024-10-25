@@ -1,0 +1,46 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig:
+#
+#---------------------------------------------------------------------------------#
+
+if LVP_APP_FLASH_DEMO
+
+
+    config LVP_APP_FLASH_TEST_LOOP
+        bool "Loop Test"
+        default y
+
+    config LVP_APP_FLASH_TEST_LOCK_IRQ
+        bool "Test with Lock IRQ"
+        default y
+
+    config LVP_APP_FLASH_TEST_DETAIL_LOG
+        bool "Enable Detail LOG"
+
+    config LVP_APP_FLASH_TEST_OFFSET
+        int "Test OFFSET, offset < 0 ? decrease from END : increase from 0"
+        default -2333
+
+    config LVP_APP_FLASH_TEST_SIZE
+        int "Test Size"
+        default 233
+
+    config LVP_APP_FLASH_TEST_READ
+        bool "Read Test"
+        default y
+
+    config LVP_APP_FLASH_TEST_ERASE
+        bool "Erase Test"
+        default y
+
+    config LVP_APP_FLASH_TEST_WRITE
+        bool "Write Test"
+        default y
+
+
+endif
+
+

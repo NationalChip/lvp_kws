@@ -1,0 +1,17 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2022 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: LM Kconfig
+#---------------------------------------------------------------------------------#
+if LVP_LM_CURTAIN_DEMO_2
+    choice
+        prompt "Language Models select:"
+        default LVP_LM_KWS_CURTAIN_DEMO_2_V0DOT1DOT0_2022_0621
+        source "lvp/vui/kws/lm_models/enable_lm/curtain_demo_2/*/lm_version.name"
+    endchoice
+
+    # lm param kconfig
+    source "lvp/vui/kws/lm_models/enable_lm/curtain_demo_2/*/Kconfig"
+endif
+

@@ -1,0 +1,23 @@
+{
+  "name": "grus-record-tool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./test.js",
+  "bin": "./test.js",
+  "scripts": {
+    "pkglinux": "pkg . -t node12-linux",
+    "pkgwin": "pkg . -t win",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "pkg": {
+    "assets": [
+      "./message_2.0.js"
+    ]
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crc-32": "^1.2.0",
+    "serialport": "^9.0.0"
+  }
+}

@@ -1,0 +1,23 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: VSP 3rd party Kconfig
+#
+#---------------------------------------------------------------------------------#
+
+choice
+prompt "select sample rate:"
+depends on USE_OPUS
+default USE_OPUS_16K
+    config USE_OPUS_8K
+        depends on USE_OPUS
+        bool "use 8k samplerate dec"
+        help
+            use opus decoder
+    config USE_OPUS_16K
+        depends on USE_OPUS
+        bool "use 16k samplerate dec"
+        help
+            use opus decoder
+endchoice

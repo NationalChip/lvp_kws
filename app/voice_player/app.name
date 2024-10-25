@@ -1,0 +1,14 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# app.name
+#
+#---------------------------------------------------------------------------------#
+
+config LVP_APP_VOICE_PLAYER
+    bool "Voice Player App"
+    select LVP_HAS_VOICE_PLAYER
+    help
+        "Detail:"
+

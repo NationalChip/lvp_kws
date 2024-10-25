@@ -1,0 +1,18 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2019 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: LM Kconfig
+#---------------------------------------------------------------------------------#
+
+menuconfig ENABLE_LANGUAGE_MODEL
+    bool "Enable Language Model"
+    default y
+
+    if ENABLE_LANGUAGE_MODEL
+        source "lvp/vui/kws/lm_models/enable_lm/Kconfig"
+    endif
+
+if !ENABLE_LANGUAGE_MODEL
+    source "lvp/vui/kws/lm_models/disable_lm/Kconfig"
+endif

@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: One KeyWord Name For ../Kconfig
+#---------------------------------------------------------------------------------#
+
+config LVP_KWS_GRUS_TWS_ZH
+    bool "grus tws zh"
+
+#---------------------------------------------------------------------------------#

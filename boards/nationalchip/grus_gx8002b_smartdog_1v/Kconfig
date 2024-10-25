@@ -1,0 +1,145 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig
+#---------------------------------------------------------------------------------#
+
+if BOARD_GX8002B_SMARTDOG_V1
+
+config BOARD_MODEL
+    default "grus_gx8002b_smartdog_1v"
+
+config BOARD_VENDOR
+    default "nationalchip"
+
+config SYS_CONFIG_NAME
+    default "grus_gx8002b_smartdog_1v"
+
+#-------------------------------------------------#
+# Board Version
+
+choice
+    prompt "Board version selects: "
+
+    config BOARD_GX8002B_SMARTDOG_1V1
+        bool "V1.1"
+    config BOARD_GX8002B_SMARTDOG_1V2
+        bool "V1.2"
+
+endchoice
+menu "Board Options: "
+comment "This Options depend PIN`s Function"
+comment "some options may be conflict             -WATCH OUT!-"
+comment "Select what you want"
+comment "-----------------------------------------------------"
+
+if BOARD_GX8002B_SMARTDOG_1V1 || BOARD_GX8002B_SMARTDOG_1V2
+
+    config BOARD_NO_DMIC
+        bool "Disable DMIC"
+        default n
+
+    config BOARD_HAS_JTAG
+        bool "Support JTAG"
+        default n
+
+    config BOARD_HAS_I2C0
+        bool "Support I2C0"
+        default n
+
+    config BOARD_HAS_HW_I2C
+        bool "Support HW I2C"
+        default n
+
+    config BOARD_HAS_I2C1
+        bool "Support I2C1"
+        default n
+
+    menuconfig BOARD_HAS_UART0
+        bool "Support UART0"
+        default n
+        if BOARD_HAS_UART0
+            config BOARD_HAS_UART0_JUST_SUPPORT_PRINTF_LOG
+                bool "Just for print log"
+                default n
+        endif
+
+    menuconfig BOARD_HAS_UART1
+        bool "Support UART1"
+        default y
+        if BOARD_HAS_UART1
+            config BOARD_HAS_UART1_JUST_SUPPORT_PRINTF_LOG
+                bool "Just for print log"
+                default n
+        endif
+
+    config BOARD_HAS_DAC_OUT
+        bool "Support DAC out"
+        default n
+
+    config BOARD_HAS_SPI_MASTER
+        bool "Support SPI MASTER"
+        default n
+
+    config BOARD_HAS_SPI_SLAVE
+        bool "Support SPI SLAVE"
+        default n
+
+    config BOARD_HAS_AIN_I2S_MASTER
+        bool "Support AudioIn I2S IN Master mode"
+        default n
+
+    config BOARD_HAS_AIN_I2S_SLAVE
+        bool "Support AudioIn I2S IN Slave mode"
+        default n
+
+    config BOARD_HAS_AIN_I2S_OUT_MASTER
+        bool "Support AudioIn I2S Out Master mode"
+        default n
+
+    config BOARD_HAS_AIN_I2S_OUT_SLAVE
+        bool "Support AudioIn I2S Out Slave mode"
+        default n
+
+    config BOARD_HAS_I2S_FIVE_WIRE_MODE
+        bool "Support I2S five wire mode, audio in I2S master + audio out I2S slave"
+        default n
+
+    config BOARD_HAS_AOUT_I2S_M
+        bool "Support AudioOut I2S Master"
+        default n
+
+    config BOARD_HAS_AOUT_I2S_S
+        bool "Support AudioOut I2S Slave"
+        default n
+endif
+endmenu
+
+#-------------------------------------------------#
+# MIC Number Setting
+config BOARD_MIC_NUM
+    default 1
+
+#-------------------------------------------------#
+config LVP_BUFFER_HAS_MIC
+    default y
+
+config LVP_BUFFER_HAS_REF
+    default n
+
+config LVP_BUFFER_HAS_FFT
+    default y
+
+config LVP_BUFFER_HAS_LOGFBANK
+    default y
+
+config LVP_BUFFER_HAS_OUTPUT
+    default n
+
+config LVP_HAS_STANDBY
+    default y
+
+endif
+
+#---------------------------------------------------------------------------------#

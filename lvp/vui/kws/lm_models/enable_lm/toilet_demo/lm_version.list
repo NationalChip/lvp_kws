@@ -1,0 +1,9 @@
+# Grus
+# Copyright (C) 2001-2022 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: 
+#---------------------------------------------------------------------------------#
+if LVP_LM_TOILET_DEMO
+    source "lvp/vui/kws/lm_models/enable_lm/toilet_demo/*/lm_version.name"
+endif

@@ -1,0 +1,53 @@
+#ifndef __CK20810_H__
+#define __CK20810_H__
+
+enum channel_gain {
+	ADC_CHANNEL_GAIN_0DB = 1,
+	ADC_CHANNEL_FADE_6DB,
+	ADC_CHANNEL_GAIN_3DB,
+	ADC_CHANNEL_GAIN_4DB,
+	ADC_CHANNEL_GAIN_5DB,
+	ADC_CHANNEL_GAIN_6DB,
+	ADC_CHANNEL_GAIN_7DB,
+	ADC_CHANNEL_GAIN_8DB,
+	ADC_CHANNEL_GAIN_9DB,
+	ADC_CHANNEL_GAIN_10DB,
+	ADC_CHANNEL_GAIN_11DB,
+	ADC_CHANNEL_GAIN_12DB,
+	ADC_CHANNEL_GAIN_13DB,
+	ADC_CHANNEL_GAIN_14DB,
+	ADC_CHANNEL_GAIN_15DB,
+	ADC_CHANNEL_GAIN_16DB,
+	ADC_CHANNEL_GAIN_17DB,
+	ADC_CHANNEL_GAIN_18DB,
+	ADC_CHANNEL_GAIN_19DB,
+	ADC_CHANNEL_GAIN_20DB,
+	ADC_CHANNEL_GAIN_21DB,
+	ADC_CHANNEL_GAIN_22DB,
+	ADC_CHANNEL_GAIN_23DB,
+	ADC_CHANNEL_GAIN_24DB,
+	ADC_CHANNEL_GAIN_25DB,
+	ADC_CHANNEL_GAIN_26DB,
+	ADC_CHANNEL_GAIN_27DB,
+	ADC_CHANNEL_GAIN_28DB,
+	ADC_CHANNEL_GAIN_29DB,
+	ADC_CHANNEL_GAIN_30DB,
+	ADC_CHANNEL_GAIN_31DB,
+};
+
+typedef struct {
+	enum channel_gain channel0;
+	enum channel_gain channel1;
+	enum channel_gain channel2;
+	enum channel_gain channel3;
+	enum channel_gain channel4;
+	enum channel_gain channel5;
+	enum channel_gain channel6;
+	enum channel_gain channel7;
+} CK20810_CONFIG;
+
+int ck20810_init(void);
+int ck20810_deinit(void);
+int ck20810_config(CK20810_CONFIG *property);
+
+#endif

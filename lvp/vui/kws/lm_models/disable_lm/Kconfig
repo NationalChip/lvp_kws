@@ -1,0 +1,14 @@
+config KWS_MODEL_BEAMSEARCH_AND_LM_CUTOFF_TOP_N
+    default 30
+
+config BEAM_SIZE
+    default 3
+
+config PREFIX_CHAR_LENGTH
+    default 8
+
+config LEVENSHTEIN_THRESHOLD
+    default 20
+
+config DIMSIM_THRESHOLD
+    default 100

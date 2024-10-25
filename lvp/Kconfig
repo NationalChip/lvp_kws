@@ -1,0 +1,529 @@
+#
+# Grus
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Gurs Kconfig
+#---------------------------------------------------------------------------------#
+
+#--------------------------------------------#
+
+menu "LVP Workmode settings"
+
+    choice
+        prompt "Initial Workmode selects:"
+
+    config LVP_INIT_WORKMODE_TWS
+        bool "TWS"
+        depends on LVP_HAS_TWS_MODE
+
+    config LVP_INIT_WORKMODE_RECORD
+        bool "Record"
+        depends on LVP_HAS_RECORD_MODE
+
+    config LVP_INIT_WORKMODE_FEED
+        bool "Feed"
+        depends on LVP_HAS_FEED_MODE
+
+    config LVP_INIT_WORKMODE_DENOISE
+        bool "Denoise"
+        depends on LVP_HAS_DENOISE_MODE
+
+    config LVP_INIT_WORKMODE_NN_DENOISE
+        bool "NN Denoise"
+        depends on LVP_HAS_NN_DENOISE_MODE
+
+    config LVP_INIT_WORKMODE_SED
+        bool "SED(Sound Event Detection)"
+        depends on LVP_HAS_SED_MODE
+
+    config LVP_INIT_WORKMODE_FFT_RECOVER
+        bool "NN Denoise"
+        depends on LVP_HAS_FFT_RECOVER_MODE
+
+    endchoice
+
+    menuconfig LVP_HAS_TWS_MODE
+        bool "Has TWS workmode"
+        default y
+        help
+          If you need TWS workmode, say Y here!
+
+    if LVP_HAS_TWS_MODE
+    endif
+
+    menuconfig LVP_HAS_RECORD_MODE
+        bool "Has record workmode"
+        default n
+        help
+          If you need record workmode, say Y here!
+
+    if LVP_HAS_RECORD_MODE
+
+    endif
+
+    menuconfig LVP_HAS_FEED_MODE
+        bool "Has feed workmode, get logfbank data from uart"
+        default n
+        help
+          If you need feed workmode, say Y here!
+
+    if LVP_HAS_FEED_MODE
+        config LVP_FEED_UART_PORT
+            int "Set Uart Port For FeedMode"
+            default 0
+            range 0 1
+    endif
+
+
+    menuconfig LVP_HAS_SED_MODE
+        bool "Has SED workmode (Sound Event Detection)"
+        default n
+        help
+        If you need SED (Sound Event Detection) workmode, say Y here!
+
+    if LVP_HAS_SED_MODE
+
+    endif
+
+    menuconfig LVP_HAS_DENOISE_MODE
+        bool "Has denoise workmode"
+        default n
+        help
+        If you need denoise workmode, say Y here!
+
+    if LVP_HAS_DENOISE_MODE
+        choice
+            prompt "Audio In Source:"
+            default DENOISE_AUDIOIN_SRC_HW
+        config DENOISE_AUDIOIN_SRC_HW
+            bool "Hardware"
+        config DENOISE_AUDIOIN_SRC_SRAM
+            bool "Sram"
+        endchoice
+
+        choice
+            prompt "Algrithom selects:"
+            default DENOISE_ENABLE_GSC
+
+            config DENOISE_ENABLE_GSC
+                bool "GSC"
+
+            config DENOISE_ENABLE_WEBRTC
+                bool "WebRtc"
+        endchoice
+
+        config COMPILE_GSC_LIB_FROM_SOURCE_CODE
+            bool "Build GSC Lib From Source Code"
+            default n
+            depends on DENOISE_ENABLE_GSC
+    endif
+
+    #---------------------------------------------------------------------------------#
+
+    menuconfig LVP_HAS_NN_DENOISE_MODE
+        bool "Has NN denoise workmode"
+        default n
+        help
+          If you need NN denoise workmode, say Y here!
+
+    if LVP_HAS_NN_DENOISE_MODE
+        config NN_DENOISE_SUPER_FAST
+            bool "Enable super fast mode"
+            default n
+
+        config NN_DENOISE_USE_FIXED_POINT
+            bool "Use fixed-point version"
+            default n
+
+        choice
+            prompt "Audio In Source:"
+            default NN_DENOISE_AUDIOIN_SRC_HW
+            config NN_DENOISE_AUDIOIN_SRC_HW
+                bool "Hardware"
+            config NN_DENOISE_AUDIOIN_SRC_SRAM
+                bool "Sram"
+        endchoice
+
+        choice
+            prompt "NN DENOISE Input and Output Sample Rate:"
+            default NN_DENOISE_SAMPLE_RATE_8K
+
+            config NN_DENOISE_SAMPLE_RATE_8K
+                bool "8K"
+
+            config NN_DENOISE_SAMPLE_RATE_16K
+                bool "16K"
+        endchoice
+
+        config DENOISE_MODEL_USE_STANDARD_PREEMPH
+            bool "use standard preemph"
+            default n
+
+        config NN_DENOISE_QUENE_DEEPTH
+            int "Set Nn Denoise Task Quene Deepth"
+            default 8
+
+        config NN_DENOISE_FFT_TMP_BUFFER_DEEPTH
+            int "Set FFT Buffer Deepth"
+            default 4
+
+        config NN_DENOISE_WAV_BUFFER_DEEPTH
+            int "Set Wav Buffer Deepth"
+            default 8
+
+        config NN_DENOISE_ENABLE_SOFT_AGC
+            bool "Soft agc for output"
+            default n
+
+        config NN_DENOISE_WAIT_NPU_CALLBACK
+            bool "Wait npu callback to prevent npu task quene full"
+            default n
+
+        config NN_DENOISE_CYCLES_DEBUG
+            bool "Print the running time of each function "
+            default n
+
+    endif
+
+    menuconfig LVP_HAS_FFT_RECOVER_MODE
+        bool "Has fft recover workmode"
+        default n
+        help
+          If you need NN denoise workmode, say Y here!
+
+endmenu
+
+menu "I/O Buffer Settings"
+    if LVP_USE_BUFFER_V2
+        comment ">>>Public Settings:<<<"
+    endif
+    if !LVP_USE_BUFFER_V2
+        config MIC_CHANNEL_NUM
+            int "MIC Channel Number"
+            default 1
+            range 1 3
+            depends on LVP_BUFFER_HAS_MIC
+
+        config REF_CHANNEL_NUM
+            int "REF Channel Number"
+            default 0
+            range 0 1
+            depends on LVP_BUFFER_HAS_REF
+
+        config FFT_CHANNEL_NUM
+            int "FFT Channel Number"
+            default 0
+            range 0 2
+            depends on LVP_BUFFER_HAS_FFT
+
+        config LOGFBANK_CHANNEL_NUM
+            int "Logfbank Channel Number"
+            default 1
+            range 1 1
+            depends on ENABLE_HARDWARE_LOGFBANK
+
+        config LVP_HAS_OUT_CHANNEL
+            bool "Has output Channel"
+            default n
+        if LVP_HAS_OUT_CHANNEL
+            config OUT_CHANNEL_NUM
+                int "Output Channel Number"
+                default 0
+                range 1 10
+        endif
+        comment ""
+    endif
+
+#--------------------------------------------#
+    comment "Frame settings:"
+    choice
+        prompt "Sample Rate selects:"
+        default PCM_SAMPLE_RATE_16K
+
+        config PCM_SAMPLE_RATE_8K
+            bool "8KHz"
+
+        config PCM_SAMPLE_RATE_16K
+            bool "16KHz"
+
+        config PCM_SAMPLE_RATE_48K
+            bool "48KHz"
+            depends on BOARD_HAS_AIN_I2S_MASTER || BOARD_HAS_AIN_I2S_SLAVE
+    endchoice
+
+    choice
+        prompt "PCM Frame Length selects:"
+        default PCM_FRAME_LENGTH_10MS
+
+        config PCM_FRAME_LENGTH_10MS
+            bool "10ms"
+        config PCM_FRAME_LENGTH_16MS
+            bool "16ms"
+    endchoice
+    comment ""
+
+#--------------------------------------------#
+    comment "Context settings:"
+
+    config LVP_CONTEXT_GAP
+        int "Context Gap"
+        range 1 3
+        default 1
+
+    config LVP_CONTEXT_NUM
+        int "Context Number"
+        range LVP_CONTEXT_GAP 8
+        default 4
+
+    if !LVP_USE_BUFFER_V2
+        config LVP_PCM_FRAME_NUM_PER_CONTEXT
+            int "PCM Frame Number in a Context"
+            range 1 10
+            default 3
+    endif
+    comment ""
+
+#--------------------------------------------#
+    if !LVP_USE_BUFFER_V2
+        comment "Buffer settings:"
+
+        config LVP_PCM_FRAME_NUM_PER_CHANNEL
+            int "PCM Frame Number in a Channel"
+            range LVP_PCM_FRAME_NUM_PER_CONTEXT 100
+            default 24
+            help
+            The value much depends on the audio in device, which requires channel buffer should be multiples of 128.
+            the value should be greater than (LVP_CONTEXT_NUM * LVP_PCM_FRAME_NUM_PER_CONTEXT)
+
+        config LVP_FFT_FRAME_NUM_PER_CHANNEL
+            int "FFT Frame Number"
+            range 2 20
+            default 24
+            depends on ENABLE_HARDWARE_FFT
+
+        config LVP_LOGFBANK_FRAME_NUM_PER_CHANNEL
+            int "Logfbank Frame Number"
+            range LVP_PCM_FRAME_NUM_PER_CHANNEL 150
+            default 12
+            depends on ENABLE_HARDWARE_LOGFBANK
+
+        if LVP_HAS_OUT_CHANNEL
+            config LVP_OUT_CHANNEL_CUSTOMIZE
+                bool "Customize Out Channel"
+                default n
+
+            if LVP_OUT_CHANNEL_CUSTOMIZE
+                config LVP_OUT_FRAME_SIZE
+                    int "Out frame size, 1 frame per context"
+                    default 16
+
+                config LVP_OUT_FRAME_NUM_PER_CHANNEL
+                    int "Out Frame Number Per Channel"
+                    default LVP_CONTEXT_NUM
+            endif
+        endif
+
+        if UART_RECORD_ENABLE || LVP_HAS_RECORD_MODE
+            if LVP_LOGFBANK_FRAME_NUM_PER_CHANNEL!=LVP_PCM_FRAME_NUM_PER_CHANNEL
+                comment "[Error] PCM Frame Number in a Channel Need Equal To Logfbank Frame Number"
+            endif
+        endif
+
+        comment ""
+    endif
+    # -------------------------------------- #
+    comment "Audio out buffer settings:"
+
+    config AUDIO_OUT_BUFFER_SIZE_KB
+        int "audio out buffer size (KBytes)"
+        default 0
+
+    comment ""
+    comment ""
+    if LVP_USE_BUFFER_V2
+        comment ">>>More Settings IN Buffer V2:<<<"
+    endif
+    menu "TWS Mode I/O Buffer Settings"
+        depends on LVP_USE_BUFFER_V2
+
+        config TWS_MIC_CHANNEL_NUM
+            int "MIC Channel Number"
+            default 1
+            range 1 3
+            depends on LVP_BUFFER_HAS_MIC
+
+        config TWS_REF_CHANNEL_NUM
+            int "REF Channel Number"
+            default 0
+            range 0 1
+            depends on LVP_BUFFER_HAS_REF
+
+        config TWS_FFT_CHANNEL_NUM
+            int "FFT Channel Number"
+            default 0
+            range 0 2
+            depends on LVP_BUFFER_HAS_FFT
+
+        config TWS_LOGFBANK_CHANNEL_NUM
+            int "Logfbank Channel Number"
+            default 1
+            range 1 1
+            depends on ENABLE_HARDWARE_LOGFBANK
+
+        config LVP_TWS_HAS_OUT_CHANNEL
+            bool "Has output Channel"
+            default n
+        if LVP_TWS_HAS_OUT_CHANNEL
+            config TWS_OUT_CHANNEL_NUM
+                int "Output Channel Number"
+                default 0
+        endif
+
+    #--------------------------------------------#
+        comment ""
+        comment "Context settings:"
+        config LVP_TWS_PCM_FRAME_NUM_PER_CONTEXT
+            int "PCM Frame Number in a Context"
+            range 1 10
+            default 3
+
+    #--------------------------------------------#
+        comment "Buffer settings:"
+
+        config LVP_TWS_PCM_FRAME_NUM_PER_CHANNEL
+            int "PCM Frame Number in a Channel"
+            range LVP_TWS_PCM_FRAME_NUM_PER_CONTEXT 100
+            default 24
+            help
+            The value much depends on the audio in device, which requires channel buffer should be multiples of 128.
+            the value should be greater than (LVP_CONTEXT_NUM * LVP_TWS_PCM_FRAME_NUM_PER_CONTEXT)
+
+        config LVP_TWS_FFT_FRAME_NUM_PER_CHANNEL
+            int "FFT Frame Number"
+            range 2 20
+            default 24
+            depends on ENABLE_HARDWARE_FFT
+
+        config LVP_TWS_LOGFBANK_FRAME_NUM_PER_CHANNEL
+            int "Logfbank Frame Number"
+            range LVP_TWS_PCM_FRAME_NUM_PER_CHANNEL 150
+            default 12
+            depends on ENABLE_HARDWARE_LOGFBANK
+
+        if LVP_TWS_HAS_OUT_CHANNEL
+            config LVP_TWS_OUT_CHANNEL_CUSTOMIZE
+                bool "Customize Out Channel"
+                default n
+
+            if LVP_TWS_OUT_CHANNEL_CUSTOMIZE
+                config LVP_TWS_OUT_FRAME_SIZE
+                    int "Out frame size, 1 frame per context"
+                    default 16
+
+                config LVP_TWS_OUT_FRAME_NUM_PER_CHANNEL
+                    int "Out Frame Number Per Channel"
+                    default LVP_CONTEXT_NUM
+            endif
+        endif
+
+        if UART_RECORD_ENABLE || LVP_HAS_RECORD_MODE
+            if LVP_TWS_LOGFBANK_FRAME_NUM_PER_CHANNEL!=LVP_TWS_PCM_FRAME_NUM_PER_CHANNEL
+                comment "[Error] PCM Frame Number in a Channel Need Equal To Logfbank Frame Number"
+            endif
+        endif
+
+        comment ""
+
+    endmenu
+
+    menu "Denoise Mode I/O Buffer Settings"
+        depends on LVP_USE_BUFFER_V2
+        config DENOISE_MIC_CHANNEL_NUM
+            int "MIC Channel Number"
+            default 1
+            range 1 3
+            depends on LVP_BUFFER_HAS_MIC
+
+        config DENOISE_REF_CHANNEL_NUM
+            int "REF Channel Number"
+            default 0
+            range 0 1
+            depends on LVP_BUFFER_HAS_REF
+
+        config DENOISE_FFT_CHANNEL_NUM
+            int "FFT Channel Number"
+            default 0
+            range 0 2
+            depends on LVP_BUFFER_HAS_FFT
+
+        config DENOISE_LOGFBANK_CHANNEL_NUM
+            int "Logfbank Channel Number"
+            default 1
+            range 1 1
+            depends on ENABLE_HARDWARE_LOGFBANK
+
+        config LVP_DENOISE_HAS_OUT_CHANNEL
+            bool "Has output Channel"
+            default y
+        if LVP_DENOISE_HAS_OUT_CHANNEL
+            config DENOISE_OUT_CHANNEL_NUM
+                int "Output Channel Number"
+                default 0
+        endif
+
+    #--------------------------------------------#
+        comment "Context settings:"
+        config LVP_DENOISE_PCM_FRAME_NUM_PER_CONTEXT
+            int "PCM Frame Number in a Context"
+            range 1 10
+            default 3
+
+    #--------------------------------------------#
+        comment "Buffer settings:"
+
+        config LVP_DENOISE_PCM_FRAME_NUM_PER_CHANNEL
+            int "PCM Frame Number in a Channel"
+            range LVP_DENOISE_PCM_FRAME_NUM_PER_CONTEXT 100
+            default 24
+            help
+            The value much depends on the audio in device, which requires channel buffer should be multiples of 128.
+            the value should be greater than (LVP_CONTEXT_NUM * LVP_DENOISE_PCM_FRAME_NUM_PER_CONTEXT)
+
+        config LVP_DENOISE_FFT_FRAME_NUM_PER_CHANNEL
+            int "FFT Frame Number"
+            range 2 20
+            default 24
+            depends on ENABLE_HARDWARE_FFT
+
+        config LVP_DENOISE_LOGFBANK_FRAME_NUM_PER_CHANNEL
+            int "Logfbank Frame Number"
+            range LVP_DENOISE_PCM_FRAME_NUM_PER_CHANNEL 150
+            default 12
+            depends on ENABLE_HARDWARE_LOGFBANK
+
+        if LVP_DENOISE_HAS_OUT_CHANNEL
+            config LVP_DENOISE_OUT_CHANNEL_CUSTOMIZE
+                bool "Customize Out Channel"
+                default n
+
+            if LVP_DENOISE_OUT_CHANNEL_CUSTOMIZE
+                config LVP_DENOISE_OUT_FRAME_SIZE
+                    int "Out frame size, 1 frame per context"
+                default 16
+
+                config LVP_DENOISE_OUT_FRAME_NUM_PER_CHANNEL
+                    int "Out Frame Number Per Channel"
+                    default LVP_CONTEXT_NUM
+            endif
+        endif
+
+        if UART_RECORD_ENABLE || LVP_HAS_RECORD_MODE
+            if LVP_DENOISE_LOGFBANK_FRAME_NUM_PER_CHANNEL!=LVP_DENOISE_PCM_FRAME_NUM_PER_CHANNEL
+                comment "[Error] PCM Frame Number in a Channel Need Equal To Logfbank Frame Number"
+            endif
+        endif
+
+    endmenu
+
+endmenu

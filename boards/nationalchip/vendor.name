@@ -1,0 +1,2 @@
+config BOARD_VENDOR_NATIONALCHIP
+    bool "NationalChip"

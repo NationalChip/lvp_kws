@@ -1,0 +1,29 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2019 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: VSP plc app Kconfig
+#
+#---------------------------------------------------------------------------------#
+
+menu "LVP Application Settings"
+
+    choice
+        prompt "Applications Selection:"
+        default LVP_APP_NONE
+
+        config LVP_APP_NONE
+            bool "None"
+
+        source "app/*/app.name"
+
+    endchoice
+
+    menu "Application Settings"
+        depends on !LVP_APP_NONE
+
+        source "app/*/Kconfig"
+
+    endmenu # "Application Settings"
+endmenu # "Lvp application Settings"
+

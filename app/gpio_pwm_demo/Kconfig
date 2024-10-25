@@ -1,0 +1,16 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig:
+#
+#---------------------------------------------------------------------------------#
+
+if LVP_APP_GPIO_PWM
+
+    config LVP_APP_GPIO_PWM_FREQ
+        int "Frequency"
+        range 48 48000
+endif
+
+

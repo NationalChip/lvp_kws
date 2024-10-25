@@ -1,0 +1,114 @@
+#
+# Grus
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Gurs Kconfig
+#---------------------------------------------------------------------------------#
+
+# Public Model Values
+config KWS_SNPU_BUFFER_SIZE
+    int
+
+config KWS_MODEL_FEATURES_DIM_PER_FRAME
+    int
+
+config KWS_MODEL_INPUT_STRIDE_LENGTH
+    int
+
+config KWS_MODEL_INPUT_WIN_LENGTH
+    int
+
+config KWS_MODEL_OUTPUT_LENGTH
+    int
+
+config KWS_MODEL_SUPPORT_SOFTMAX
+    bool
+
+config KWS_MODEL_BEAMSEARCH_AND_LM_ALPHA
+    int
+
+config KWS_MODEL_BEAMSEARCH_AND_LM_BETA
+    int
+
+config KWS_MODEL_BEAMSEARCH_AND_LM_CUTOFF_TOP_N
+    int
+
+config BEAM_SIZE
+    int
+
+config PREFIX_CHAR_LENGTH
+    int
+
+config LEVENSHTEIN_THRESHOLD
+    int
+
+config DIMSIM_THRESHOLD
+    int
+
+config NORMAL_CTC_SCORE
+    bool
+
+config NPU_TOTAL_SIZE
+    int
+
+#---------------------------------------------------------------------------------#
+
+choice
+    prompt "Keyword Decoder Type"
+    default LVP_ENABLE_CTC_DECODER
+    config LVP_ENABLE_CTC_DECODER
+        bool "Ctc Decoder"
+    config LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER
+        bool "CTC And Beamsearch Decoder"
+    config LVP_ENABLE_BEAMSEARCH_DECODER
+        bool "Beamsearch Decoder without CTC"
+    config LVP_ENABLE_MAX_DECODER
+        bool "Max Deocder"
+    config LVP_ENABLE_USER_DECODER
+        bool "User Deocder" 
+endchoice
+
+if LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER
+    config FILTER_LOW_CTC_SCORES_TH_WHEN_BM_IS_FALSE
+        int "Filter Low Ctc Scores Threshold When Bm is False(x10)"
+        default 0
+        range 0 1000
+endif
+
+source "lvp/vui/kws/models/Kconfig"
+
+config ENABLE_CTC_JUDGE_TO_REDUCE_FALSE_ACTIVATION
+    bool "Enable CTC Judge To Reduce False Activation"
+    default n
+
+comment ""
+config VPA_ENABLE_ONLY_PRINTF_SCORE_WITHOUT_ACTIVATE
+    bool "Enable Only Printf Score Without Active"
+    default n
+config VPA_ENABLE_DELAY_TO_DECODE
+    bool "Enable Delay To Decode"
+    default n
+config VPA_DELAY_TO_DECODE_CNT
+    int "Delay Count To Decode (ctx)"
+    depends on VPA_ENABLE_DELAY_TO_DECODE
+    default 2
+
+if LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER || LVP_ENABLE_BEAMSEARCH_DECODER
+    config ENABLE_KWS_LEVEL_DECODER
+        bool "Enable Kws Level Decoder"
+        default n
+    config ENABLE_CLEAR_TOP_KWS_AUDIO
+        bool "Enable Clear Top KWS Audio When Top Kws Activation"
+        default y
+        depends on ENABLE_KWS_LEVEL_DECODER
+    comment ""
+    source "lvp/vui/kws/lm_models/Kconfig"
+endif
+
+if LVP_ENABLE_CTC_DECODER
+    config PREFIX_CHAR_LENGTH
+        default 8
+endif
+
+#---------------------------------------------------------------------------------#

@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Model Name
+#---------------------------------------------------------------------------------#
+
+config LVP_KWS_GRUS_TWS_ZH_V0DOT2DOT0_2021_0527
+    bool "LVP_KWS_GRUS_TWS_ZH_V0DOT2DOT0_2021_0527"
+
+#---------------------------------------------------------------------------------#

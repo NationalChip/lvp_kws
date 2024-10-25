@@ -1,0 +1,107 @@
+#
+# Grus
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Gurs Kconfig
+#---------------------------------------------------------------------------------#
+
+menu "VUI Settings"
+
+#--------------------------------------------#
+    comment "VAD Settings:"
+    config LVP_FFT_VAD_ENABLE
+        bool "Enable FFT Vad"
+        default n
+    config LVP_FFT_INVALID_VAD_NUM
+        int "Number of invalid vad, use for filter invalid vad, unit by context"
+        default 25
+        depends on LVP_FFT_VAD_ENABLE
+    config LVP_VAD_FALLBACK_CONTEXT
+        int "Fallback Context Number When FFTVAD Valid"
+        default 4
+        depends on LVP_FFT_VAD_ENABLE
+    config LVP_ENABLE_AUTO_ADJUST_VAD_PARAMETER
+        bool "Enable Auto Adjust VAD Parameter"
+        depends on LVP_FFT_VAD_ENABLE
+        default n
+    menuconfig LVP_ENABLE_G_SENSOR_VAD
+        bool "ENABLE G sensor Vad"
+        depends on LVP_HAS_G_SENSOR_DEVICE
+        default y
+
+    comment ""
+
+    comment "ENV Noise Judgment Settings:"
+    config ENABLE_NOISE_JUDGEMENT
+        bool "Enable Noise Judgment"
+        default n
+    config HIGH_NOISE_MAINTAIN_TIME
+        int "High Noise Maintain Time [unit of context]"
+        depends on ENABLE_NOISE_JUDGEMENT
+        default 150
+    config MID_NOISE_MAINTAIN_TIME
+        int "Mid Noise Maintain Time [unit of context]"
+        depends on ENABLE_NOISE_JUDGEMENT
+        default 50
+    config LOW_NOISE_MAINTAIN_TIME
+        int "Low Noise Maintain Time [unit of context]"
+        depends on ENABLE_NOISE_JUDGEMENT
+        default 150
+
+    comment ""
+
+    config LVP_STANDBY_ENABLE
+        bool "Enable Standby"
+        default n
+    config LVP_DISABLE_XIP_WHILE_CODE_RUN_AT_SRAM
+        depends on LVP_STANDBY_ENABLE
+        bool "Disable XIP While Code Run At Sram"
+        default n
+    config LVP_ENABLE_ENERGY_VAD
+        depends on LVP_STANDBY_ENABLE
+        bool "Enable Energy Vad"
+        default n
+    config LVP_STATE_FVAD_COUNT_DOWN
+        int "LVP State Fvad count down, use for switch State Fvad to Standby,unit by context"
+        depends on LVP_STANDBY_ENABLE
+        default 18
+
+    comment ""
+
+    config LVP_ENABLE_KEYWORD_RECOGNITION
+        bool "Enable Keyword Recognition"
+        default y
+    if LVP_ENABLE_KEYWORD_RECOGNITION
+        source "lvp/vui/kws/Kconfig"
+    endif
+
+    comment ""
+
+    config LVP_ENABLE_VOICE_PRINT_RECOGNITION
+        bool "Enable Voice Print Recognition"
+        default n
+    if LVP_ENABLE_VOICE_PRINT_RECOGNITION
+        source "lvp/vui/vpr/Kconfig"
+    endif
+
+    comment ""
+
+    config LVP_ENABLE_NN_DENOISE
+    depends on LVP_HAS_NN_DENOISE_MODE
+        bool "Enable cnn denoise"
+        default n
+    if LVP_ENABLE_NN_DENOISE
+        source "lvp/vui/denoise/Kconfig"
+    endif
+
+    config LVP_ENABLE_SED
+    depends on LVP_HAS_SED_MODE
+        bool "Enable SED(Sound Event Detection)"
+        default n
+    if LVP_ENABLE_SED
+        source "lvp/vui/sed/Kconfig"
+    endif
+endmenu
+
+#---------------------------------------------------------------------------------#

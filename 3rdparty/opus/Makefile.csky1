@@ -1,0 +1,303 @@
+#################### COMPILE OPTIONS #######################
+
+
+# Uncomment this for fixed-point build
+FIXED_POINT=1
+
+# It is strongly recommended to uncomment one of these
+# VAR_ARRAYS: Use C99 variable-length arrays for stack allocation
+# USE_AllLLOCA: Use alloca() for stack allocation
+# If none is defined, then the fallback is a non-threadsafe global array
+CFLAGS := -DUSE_ALLOCA $(CFLAGS)
+
+#CFLAGS := -DVAR_ARRAYS $(CFLAGS)
+
+#CFLAGS := -DVAR_ARRAYS $(CFLAGS)
+
+# These options affect performance
+# HAVE_LRINTF: Use C99 intrinsics to speed up float-to-int conversion
+#CFLAGS := -DHAVE_LRINTF $(CFLAGS)
+
+###################### END OF OPTIONS ######################
+-include config.mk
+
+CDIR   = .
+BUILDDIR= $(CDIR)/Out
+OBJDIR = $(CDIR)/Obj
+MAKEDIR = $(shell pwd)
+ROOTDIR = .
+
+TARGET_CPU = $(cpu)
+SOC     = $(soc)
+BOARD = $(board)
+
+export TARGET_CPU SOC
+
+LINKFILE = gcc_csky.ld
+#LINKDIR  = $(ROOTDIR)/csi/csi_driver/$(soc)
+
+
+-include package_version
+
+include silk_sources.mk
+include celt_sources.mk
+include opus_sources.mk
+
+ifdef FIXED_POINT
+SILK_SOURCES += $(SILK_SOURCES_FIXED)
+else
+SILK_SOURCES += $(SILK_SOURCES_FLOAT)
+OPUS_SOURCES += $(OPUS_SOURCES_FLOAT)
+endif
+# csky file
+
+#DRV_DIRS = $(shell ls $(ROOTDIR)/csi/csi_driver/common  -F | grep /$ | grep -v CVS | grep -v include \
+                | sed "s/\///g")
+
+#DRVDIR_FILES = $(foreach dir, $(DRV_DIRS), $(ROOTDIR)/csi/csi_driver/common/$(dir)/*.c)
+
+CSRC = 
+
+
+CSRC +=   $(MAKEDIR)/*.c
+SSRC +=    $(ROOTDIR)/*.S
+#SSRC =
+CPPSRCFILE = $(wildcard $(CPPSRC))
+SSRCFILE = $(wildcard $(SSRC))
+CSRCFILE = $(wildcard $(CSRC)) $(wildcard $(DRVDIR_FILES))
+
+EXESUFFIX =
+LIBPREFIX = lib
+LIBSUFFIX = .a
+OBJSUFFIX = .o
+
+cppflags-from-defines   = $(addprefix -D,$(1))
+cppflags-from-includes  = $(addprefix -I,$(1))
+ldflags-from-ldlibdirs  = $(addprefix -L,$(1))
+ldlibs-from-libs        = $(addprefix -l,$(1))
+
+WARNINGS = -Wall -W -Wstrict-prototypes -Wextra -Wcast-align -Wnested-externs -Wshadow
+
+# csky flags
+CFLAGS  += -mcpu=ck803efr1 -std=gnu99 -O2 $(WARNINGS) -DENABLE_ASSERTIONS -DOPUS_BUILD \
+		   -DOPUS_CSKY_INLINE_ASM -DOVERRIDE_silk_warped_autocorrelation_FIX
+CFLAGS +=   -mlittle-endian -mno-multiple-stld -DUSE_DEFAULT_STDLIB 
+CFLAGS += -Wall
+CFLAGS += -fno-strict-aliasing -fomit-frame-pointer -I./
+CFLAGS += -frename-registers -mhigh-registers -ffunction-sections
+CFLAGS += -mistack
+
+LDFLAGS += $(CFLAGS)
+
+CINCLUDES = include silk celt
+CINCLUDES += \
+             $(ROOTDIR)/
+
+ifdef FIXED_POINT
+CFLAGS += -DFIXED_POINT=1 -DDISABLE_FLOAT_API
+CINCLUDES += silk/fixed
+else
+CINCLUDES += silk/float
+endif
+
+# csky files
+
+LIBS = m  opus
+
+LDLIBDIRS = ./
+
+CFLAGS  += $(call cppflags-from-defines,$(CDEFINES))
+CFLAGS  += $(call cppflags-from-includes,$(CINCLUDES))
+LDFLAGS += $(call ldflags-from-ldlibdirs,$(LDLIBDIRS))
+LDLIBS  += $(call ldlibs-from-libs,$(LIBS))
+
+ARCHS = -I./ -nostartfiles  -Wl,-T$(LINKDIR)/$(LINKFILE)
+COMPILE.c.cmdline   = @$(CC) -c $(CFLAGS) -o $@ $<
+LINK.o              = @$(CC) $(LDPREFLAGS) $(LDFLAGS)
+LINK.o.cmdline      = @$(LINK.o) $^ $(LDLIBS) $(ARCHS) -o $@$(EXESUFFIX) -Wl,-gc-sections 
+
+ARCHIVE.cmdline     = @$(AR) $(ARFLAGS) $@ $^ && $(RANLIB) $@
+
+%$(OBJSUFFIX):%.c
+	$(COMPILE.c.cmdline)
+
+%$(OBJSUFFIX):%.cpp
+	$(COMPILE.cpp.cmdline)
+
+%$(OBJSUFFIX):%.S
+	@echo AS $<
+	$(COMPILE.c.cmdline)
+
+COBJECTS := $(patsubst %.c,%$(OBJSUFFIX),$(CSRCFILE))  $(patsubst %.S,%$(OBJSUFFIX),$(SSRCFILE)) 
+# Directives
+
+
+# Variable definitions
+LIB_NAME = opus
+TARGET = $(LIBPREFIX)$(LIB_NAME)$(LIBSUFFIX)
+
+SRCS_C = $(SILK_SOURCES) $(CELT_SOURCES) $(OPUS_SOURCES)
+
+OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(SRCS_C))
+#OBJS += $(COBJECTS)
+OPUSDEMO_SRCS_C = src/opus_demo.c
+OPUSDEMO_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(OPUSDEMO_SRCS_C))
+
+TESTOPUSAPI_SRCS_C = tests/test_opus_api.c
+TESTOPUSAPI_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(TESTOPUSAPI_SRCS_C))
+
+TESTOPUSDECODE_SRCS_C = tests/test_opus_decode.c
+TESTOPUSDECODE_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(TESTOPUSDECODE_SRCS_C))
+
+TESTOPUSENCODE_SRCS_C = tests/test_opus_encode.c tests/opus_encode_regressions.c
+TESTOPUSENCODE_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(TESTOPUSENCODE_SRCS_C))
+
+TESTOPUSPADDING_SRCS_C = tests/test_opus_padding.c
+TESTOPUSPADDING_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(TESTOPUSPADDING_SRCS_C))
+
+OPUSCOMPARE_SRCS_C = src/opus_compare.c
+OPUSCOMPARE_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(OPUSCOMPARE_SRCS_C))
+
+# add unit test
+CELT_TESTS_DIR := celt/tests
+SILK_TESTS_DIR := silk/tests
+
+#UTESTS = $(CELT_TESTS_DIR)/test_unit_cwrs32 	\
+		 $(CELT_TESTS_DIR)/test_unit_dft		\
+		 $(CELT_TESTS_DIR)/test_unit_entropy	\
+		 $(CELT_TESTS_DIR)/test_unit_laplace 	\
+		 $(CELT_TESTS_DIR)/test_unit_mathops	\
+		 $(CELT_TESTS_DIR)/test_unit_mdct		\
+		 $(CELT_TESTS_DIR)/test_unit_rotation 	\
+		 $(CELT_TESTS_DIR)/test_unit_types
+#UTESTS += $(SILK_TESTS_DIR)/test_unit_LPC_inv_pred_gain
+
+T_DIR = opusenc
+TTESTS = $(T_DIR)/opusenc
+
+#TESTS := test_opus_api test_opus_decode test_opus_encode test_opus_padding
+TESTS := test_opus_api test_opus_encode test_opus_padding \
+		 $(UTESTS) test_opus_encode_csky
+
+# Rules
+lib: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(ARCHIVE.cmdline)
+
+all: lib opus_demo opus_compare $(TESTS)
+
+debug:
+	echo $(COBJECTS)
+	echo $(CSRC)
+check: all
+	for test in $(TESTS); do ./$$test; done
+
+opus_demo$(EXESUFFIX): $(OPUSDEMO_OBJS) $(TARGET) $(COBJECTS)
+	echo $(COBJECTS)
+	$(LINK.o.cmdline)
+
+test_opus_api$(EXESUFFIX): $(TESTOPUSAPI_OBJS) $(TARGET) $(COBJECTS)
+	$(LINK.o.cmdline)
+
+test_opus_decode$(EXESUFFIX): $(TESTOPUSDECODE_OBJS) $(TARGET) $(COBJECTS)
+	$(LINK.o.cmdline)
+
+test_opus_encode$(EXESUFFIX): $(TESTOPUSENCODE_OBJS) $(TARGET) $(COBJECTS)
+	$(LINK.o.cmdline)
+
+test_opus_padding$(EXESUFFIX): $(TESTOPUSPADDING_OBJS) $(TARGET) $(COBJECTS)
+	$(LINK.o.cmdline)
+
+opus_compare$(EXESUFFIX): $(OPUSCOMPARE_OBJS)
+	$(LINK.o.cmdline)
+
+# add unit test
+CELT_TESTS_TEST_UNIT_CWRS32_SRCS_C = $(CELT_TESTS_DIR)/test_unit_cwrs32.c
+CELT_TESTS_TEST_UNIT_CWRS32_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(CELT_TESTS_TEST_UNIT_CWRS32_SRCS_C))
+$(CELT_TESTS_DIR)/test_unit_cwrs32$(EXESUFFIX): $(CELT_TESTS_TEST_UNIT_CWRS32_OBJS) $(TARGET)
+	$(LINK.o.cmdline)
+
+CELT_TESTS_TEST_UNIT_DFT_SRCS_C = $(CELT_TESTS_DIR)/test_unit_dft.c
+CELT_TESTS_TEST_UNIT_DFT_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(CELT_TESTS_TEST_UNIT_DFT_SRCS_C))
+$(CELT_TESTS_DIR)/test_unit_dft$(EXESUFFIX): $(CELT_TESTS_TEST_UNIT_DFT_OBJS) $(TARGET)
+	$(LINK.o.cmdline)
+
+CELT_TESTS_TEST_UNIT_ENTROPY_SRCS_C = $(CELT_TESTS_DIR)/test_unit_entropy.c
+CELT_TESTS_TEST_UNIT_ENTROPY_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(CELT_TESTS_TEST_UNIT_ENTROPY_SRCS_C))
+$(CELT_TESTS_DIR)/test_unit_entropy$(EXESUFFIX): $(CELT_TESTS_TEST_UNIT_ENTROPY_OBJS) $(TARGET)
+	$(LINK.o.cmdline)
+
+CELT_TESTS_TEST_UNIT_LAPLACE_SRCS_C = $(CELT_TESTS_DIR)/test_unit_laplace.c
+CELT_TESTS_TEST_UNIT_LAPLACE_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(CELT_TESTS_TEST_UNIT_LAPLACE_SRCS_C))
+$(CELT_TESTS_DIR)/test_unit_laplace$(EXESUFFIX): $(CELT_TESTS_TEST_UNIT_LAPLACE_OBJS) $(TARGET)
+	$(LINK.o.cmdline)
+
+CELT_TESTS_TEST_UNIT_MATHOPS_SRCS_C = $(CELT_TESTS_DIR)/test_unit_mathops.c
+CELT_TESTS_TEST_UNIT_MATHOPS_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(CELT_TESTS_TEST_UNIT_MATHOPS_SRCS_C))
+$(CELT_TESTS_DIR)/test_unit_mathops$(EXESUFFIX): $(CELT_TESTS_TEST_UNIT_MATHOPS_OBJS) $(TARGET)
+	$(LINK.o.cmdline)
+
+CELT_TESTS_TEST_UNIT_MDCT_SRCS_C = $(CELT_TESTS_DIR)/test_unit_mdct.c
+CELT_TESTS_TEST_UNIT_MDCT_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(CELT_TESTS_TEST_UNIT_MDCT_SRCS_C))
+$(CELT_TESTS_DIR)/test_unit_mdct$(EXESUFFIX): $(CELT_TESTS_TEST_UNIT_MDCT_OBJS) $(TARGET)
+	$(LINK.o.cmdline)
+
+CELT_TESTS_TEST_UNIT_ROTATION_SRCS_C = $(CELT_TESTS_DIR)/test_unit_rotation.c
+CELT_TESTS_TEST_UNIT_ROTATION_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(CELT_TESTS_TEST_UNIT_ROTATION_SRCS_C))
+$(CELT_TESTS_DIR)/test_unit_rotation$(EXESUFFIX): $(CELT_TESTS_TEST_UNIT_ROTATION_OBJS) $(TARGET)
+	$(LINK.o.cmdline)
+
+CELT_TESTS_TEST_UNIT_TYPES_SRCS_C = $(CELT_TESTS_DIR)/test_unit_types.c
+CELT_TESTS_TEST_UNIT_TYPES_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(CELT_TESTS_TEST_UNIT_TYPES_SRCS_C))
+$(CELT_TESTS_DIR)/test_unit_types$(EXESUFFIX): $(CELT_TESTS_TEST_UNIT_TYPES_OBJS) $(TARGET)
+	$(LINK.o.cmdline)
+
+SILK_TESTS_TEST_UNIT_LPC_INV_PRED_GAIN_SRCS_C = $(SILK_TESTS_DIR)/test_unit_LPC_inv_pred_gain.c
+SILK_TESTS_TEST_UNIT_LPC_INV_PRED_GAIN_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(SILK_TESTS_TEST_UNIT_LPC_INV_PRED_GAIN_SRCS_C))
+$(SILK_TESTS_DIR)/test_unit_LPC_inv_pred_gain$(EXESUFFIX): $(SILK_TESTS_TEST_UNIT_LPC_INV_PRED_GAIN_OBJS) $(TARGET)
+	$(LINK.o.cmdline)
+
+TESTOPUSENCODE_CSKY_SRCS_C = tests/test_opus_encode_csky.c
+TESTOPUSENCODE_CSKY_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(TESTOPUSENCODE_CSKY_SRCS_C))
+test_opus_encode_csky$(EXESUFFIX): $(TESTOPUSENCODE_CSKY_OBJS) $(TARGET) $(COBJECTS)
+	$(LINK.o.cmdline)
+
+# add opusenc
+T_OPUSENC_SRCS_C = $(T_DIR)/opus_header.c \
+				   $(T_DIR)/opusenc.c \
+				   $(T_DIR)/picture.c \
+				   $(T_DIR)/resample.c \
+				   $(T_DIR)/audio-in.c \
+				   $(T_DIR)/diag_range.c \
+				   $(T_DIR)/flac.c \
+				   $(T_DIR)/unicode_support.c
+
+T_OPUSENC_OBJS := $(patsubst %.c,%$(OBJSUFFIX),$(T_OPUSENC_SRCS_C))
+COBJECTS = $(SSRCFILE:%.S=%.o) $(CSRCFILE:%.c=%.o) $(CPPSRCFILE:%.cpp=%.o)
+$(T_DIR)/opusenc$(EXESUFFIX): $(T_OPUSENC_OBJS) $(TARGET) $(COBJECTS)
+	$(LINK.o.cmdline)
+
+celt/celt.o: CFLAGS += -DPACKAGE_VERSION='$(PACKAGE_VERSION)'
+celt/celt.o: package_version
+
+package_version: force
+	@if [ -x ./update_version ]; then \
+		./update_version || true; \
+	elif [ ! -e ./package_version ]; then \
+		echo 'PACKAGE_VERSION="unknown"' > ./package_version; \
+	fi
+
+force:
+
+clean:
+	@rm -f opus_demo$(EXESUFFIX) opus_compare$(EXESUFFIX) $(TARGET) \
+                test_opus_api$(EXESUFFIX) test_opus_decode$(EXESUFFIX) \
+                test_opus_encode$(EXESUFFIX) test_opus_padding$(EXESUFFIX) \
+		$(OBJS) $(OPUSDEMO_OBJS) $(OPUSCOMPARE_OBJS) $(TESTOPUSAPI_OBJS) \
+                $(TESTOPUSDECODE_OBJS) $(TESTOPUSENCODE_OBJS) $(TESTOPUSPADDING_OBJS) \
+                $(UTESTS) \
+                $(CELT_TESTS_DIR)/*$(OBJSUFFIX) $(SILK_TESTS_DIR)/*$(OBJSUFFIX) \
+                test_opus_encode_csky$(EXESUFFIX) $(TESTOPUSENCODE_CSKY_OBJS)
+
+.PHONY: all lib clean force check
