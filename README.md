@@ -1,18 +1,8 @@
 # lvp_kws
-中英文耳机
+低功耗中文、英文唤醒SDK，适用于可穿戴产品
 
-## 环境安装
-linux环境编译
-
-sudo apt-get install libncurses5-dev
-
-## 工具链下载和安装
-### 工具链下载地址：https://ai.nationalchip.com/api/v1/assets/32/download
-
-### 安装:
-1. sudo mkdir -p /opt/csky-abiv2-elf/; cd /opt/csky-abiv2-elf/; 新建并进入路径
-2. sudo tar xvf csky-elfabiv2-tools-x86_64-minilibc-*.tar.gz; 解压到当前路径
-3. 然后需要编辑 ~/.profile或者 ~/.bashrc，将/opt/csky-abiv2-elf/bin加入到PATH路径中
+## SDK工具链安装
+* 请阅读：[SDK工具链安装](https://nationalchip.gitlab.io/ai_audio_docs/software/lvp/SDK%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/SDK%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E6%90%AD%E5%BB%BA%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/#1-sdk)
 
 ## 中文编译：
 1. cp ./configs/grus_gx8002b_dev_erji_chinese.config .config
@@ -51,8 +41,6 @@ sudo apt-get install libncurses5-dev
 9. volume down
 10. volume up
 
-## 固件烧录
-1. cd tools/bootx/
-2. sudo ./bootx -m grus -c download 0x0 ../../output/mcu_nor.bin -d /dev/ttyUSB0
-3. 重启设备,等待烧录完成
-4. 打开串口终端,重启设备,查看串口输出
+## 固件烧录：
+* 请阅读：[串口升级](https://nationalchip.gitlab.io/ai_audio_docs/software/lvp/SDK%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97/SDK%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E4%B8%B2%E5%8F%A3%E5%8D%87%E7%BA%A7/)
+
