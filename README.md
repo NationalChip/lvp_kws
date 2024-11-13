@@ -1,6 +1,6 @@
 # lvp_kws
 * GX8002 是一款专为低功耗领域设计的**超低功耗 AI 神经网络芯片**，适用于低功耗可穿戴设备和语音遥控器等应用。该芯片具有体积小、功耗低、成本低等显著优势。它集成了杭州国芯微自主研发的第二代神经网络处理器 gxNPU V200，支持 **TensorFlow** 和 **Pytorch** 框架，以及自研的硬件 VAD（语音活动检测），显著降低了功耗。在实际测试场景中，VAD 待机功耗可低至 70uW，运行功耗约为 0.6mW，芯片的平均功耗约为 300uW。
-* 此仓库适用于开发者自己训练模型进行开发。
+* 此仓库适用于开发者部署自己训练模型进行开发。
 
 ## 开发板介绍
 * 请阅读：[GX8002_DEV开发板介绍](https://nationalchip.gitlab.io/ai_audio_docs/hardware/%E5%BC%80%E5%8F%91%E6%9D%BF%E7%A1%AC%E4%BB%B6%E5%8F%82%E8%80%83%E8%AE%BE%E8%AE%A1/GX8002/GX8002_DEV%E5%BC%80%E5%8F%91%E6%9D%BF/)，在此页面您可以下载开发板硬件规格资料和硬件设计资料。
@@ -39,35 +39,37 @@
 2. make menuconfig
 3. 然后保存退出
 4. make clean;make
-
-中文指令：
-1. 小爱同学
-2. 接听电话
-3. 挂掉电话
-4. 挂断电话
-5. 上一首
-6. 下一首
-7. 暂停播放
-8. 停止播放
-9. 播放音乐
-10. 增大音量
-11. 减小音量
+* 中文指令词列表：
+```
+    1. 小爱同学
+    2. 接听电话
+    3. 挂掉电话
+    4. 挂断电话
+    5. 上一首
+    6. 下一首
+    7. 暂停播放
+    8. 停止播放
+    9. 播放音乐
+    10. 增大音量
+    11. 减小音量
+```
 
 ### 英文编译：
 1. cp ./configs/grus_gx8002b_dev_erji_english.config .config
 2. make menuconfig
 3. 然后保存退出
 4. make clean;make
-
-英文指令：
-1. hey siri
-2. ok google
-3. answer the phone
-4. play music
-5. play next song
-6. play previous song
-7. reject the call
-8. stop playing
-9. volume down
-10. volume up
+* 英文指令词列表：
+    ```
+    1. hey siri
+    2. ok google
+    3. answer the phone
+    4. play music
+    5. play next song
+    6. play previous song
+    7. reject the call
+    8. stop playing
+    9. volume down
+    10. volume up
+    ```
 
