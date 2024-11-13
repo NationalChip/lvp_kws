@@ -1,6 +1,9 @@
 # lvp_kws
+* lvp_kws 概述：
+    * **lvp_kws** 全称为 Lower-Power Voice Process KWS， 是专门为了低功耗可穿戴设备和语音遥控器等应用而研发的语音信号处理框架，适用于 **GX8002D** 芯片.。
+    * 如果开发者不想自己训练模型，可以直接使用如下sdk：
+        * **lvp_aiot(https://github.com/NationalChip/lvp_aiot)**  是专门为了低功耗、可配置离线语音识别而研发的语音信号处理框架，适用于 **GX8002D** 芯片，与 **viva(https://github.com/NationalChip/viva)** 配套使用，开发者不需要自己训练模型，常规的应用也不需要额外开发，利用**viva**可以轻松实现"0代码"开发。
 * GX8002 是一款专为低功耗领域设计的**超低功耗 AI 神经网络芯片**，适用于低功耗可穿戴设备和语音遥控器等应用。该芯片具有体积小、功耗低、成本低等显著优势。它集成了杭州国芯微自主研发的第二代神经网络处理器 gxNPU V200，支持 **TensorFlow** 和 **Pytorch** 框架，以及自研的硬件 VAD（语音活动检测），显著降低了功耗。在实际测试场景中，VAD 待机功耗可低至 70uW，运行功耗约为 0.6mW，芯片的平均功耗约为 300uW。
-* 此仓库适用于开发者部署自己训练模型进行开发。
 
 ## 开发板介绍
 * 请阅读：[GX8002_DEV开发板介绍](https://nationalchip.gitlab.io/ai_audio_docs/hardware/%E5%BC%80%E5%8F%91%E6%9D%BF%E7%A1%AC%E4%BB%B6%E5%8F%82%E8%80%83%E8%AE%BE%E8%AE%A1/GX8002/GX8002_DEV%E5%BC%80%E5%8F%91%E6%9D%BF/)，在此页面您可以下载开发板硬件规格资料和硬件设计资料。
