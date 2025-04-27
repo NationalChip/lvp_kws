@@ -1,0 +1,136 @@
+/*
+ * Copyright (C) 2016-2019 C-SKY Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/******************************************************************************
+ * @file     csky_inv_cfft_q15_yv.c
+ * @brief    Radix Decimation in Q15 Frequency CFFT processing function.
+ * @version  V1.0
+ * @date     15. Nov 2016
+ ******************************************************************************/
+
+#include "csky_math.h"
+#include "csky_const_structs.h"
+
+extern void csky_radix4_butterfly_inverse_yv_q15(
+    q15_t * pSrc,
+    uint32_t fftLen,
+    const q15_t * pCoef,
+    uint32_t twidCoefModifier);
+
+extern void csky_bitreversal_16(
+    uint16_t * pSrc,
+    const uint16_t bitRevLen,
+    const uint16_t * pBitRevTable);
+
+void csky_cfft_radix4by2_inverse_yv_q15(
+    q15_t * pSrc,
+    uint32_t fftLen,
+    const q15_t * pCoef);
+
+/**
+* @addtogroup ComplexFFTyv
+* @{
+*/
+
+/**
+*
+* @brief       Processing function for the Q15 complex inverse FFT.
+* @param[in]      log_buf_len  log2 value of FFT size, the FFT size N is (1<<log2_buf_len)
+* @param[in, out] *in_buf     point to the input and output memory
+* @param[in]      *out_buf    not used
+* @param[in]      *twi_table  point to the twi table
+* @param[in]      *bitrev_tbl point to the bit reversal table
+* @param[in]      *temp_buf   not used
+* @param[in]      *ScaleShift not used
+* @param[in]      br           bit reversal flag, always set
+* @return none.
+*/
+
+void csky_fft_lib_cx16_ifft(
+    q31_t log2_buf_len,
+    q15_t * in_buf,
+    q15_t * out_buf,
+    const q15_t * twi_table,
+    const uint16_t * bitrev_tbl,
+    q15_t * temp_buf,
+    q7_t  * ScaleShift,
+    q31_t br)
+{
+    uint32_t L;
+    uint16_t bitRevLen;
+
+    L = (1 << log2_buf_len);
+    switch(L)
+    {
+
+    case 16:
+        bitRevLen = CSKYBITREVINDEXTABLE_FIXED___16_TABLE_LENGTH;
+        break;
+    case 32:
+        bitRevLen = CSKYBITREVINDEXTABLE_FIXED___32_TABLE_LENGTH;
+        break;
+    case 64:
+        bitRevLen = CSKYBITREVINDEXTABLE_FIXED___64_TABLE_LENGTH;
+        break;
+    case 128:
+        bitRevLen = CSKYBITREVINDEXTABLE_FIXED__128_TABLE_LENGTH;
+        break;
+    case 256:
+        bitRevLen = CSKYBITREVINDEXTABLE_FIXED__256_TABLE_LENGTH;
+        break;
+    case 512:
+        bitRevLen = CSKYBITREVINDEXTABLE_FIXED__512_TABLE_LENGTH;
+        break;
+    case 1024:
+        bitRevLen = CSKYBITREVINDEXTABLE_FIXED_1024_TABLE_LENGTH;
+        break;
+    case 2048:
+        bitRevLen = CSKYBITREVINDEXTABLE_FIXED_2048_TABLE_LENGTH;
+        break;
+    case 4096:
+        bitRevLen = CSKYBITREVINDEXTABLE_FIXED_4096_TABLE_LENGTH;
+        break;
+    }
+
+    switch (L)
+    {
+    case 16:
+    case 64:
+    case 256:
+    case 1024:
+    case 4096:
+        csky_radix4_butterfly_inverse_yv_q15(in_buf, L, twi_table, 1);
+        break;
+
+    case 32:
+    case 128:
+    case 512:
+    case 2048:
+        csky_cfft_radix4by2_inverse_yv_q15(in_buf, L, twi_table);
+        break;
+    }
+
+    if(br)
+    {
+        csky_bitreversal_16((uint16_t*)in_buf, bitRevLen, bitrev_tbl);
+    }
+}
+
+/**
+* @} end of ComplexFFTyv group
+*/

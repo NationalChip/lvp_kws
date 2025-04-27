@@ -1,0 +1,460 @@
+/*
+ * Copyright (C) 2016-2019 C-SKY Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/******************************************************************************
+ * @file     csky_conv_partial_fast_q31.S
+ * @brief    Fast Partial convolution of Q31 sequences.
+ * @version  V1.0
+ * @date     31. Aug 2017
+ ******************************************************************************/
+
+/*
+ * csky_status csky_conv_partial_fast_q31(
+ *   q31_t * pSrcA
+ *   uint32_t srcALen,
+ *   q31_t * pSrcB,
+ *   uint32_t srcBLen
+ *   q31_t * pDst,
+ *   uint32_t firstIndex,
+ *   uindt32_t numPoints)
+ */
+
+    .file           "csky_conv_partial_fast_q31.S"
+    .section        .text.csky_conv_partial_fast_q31,"ax",@progbits
+    .align          2
+    .global         csky_conv_partial_fast_q31
+    .type           csky_conv_partial_fast_q31, @function
+
+csky_conv_partial_fast_q31:
+    push            l0, l1, l2, l3, l4 ,l5, l6, l7, l8, l9
+    ld.w            l0, (sp, 0x2c)      // load firstIndex
+    ld.w            l1, (sp, 0x30)      // load numPoints
+    ld.w            l9, (sp, 0x28)      // load *pDst
+    add             t0, l0, l1
+    subi            t1, a3, 1
+    add             t3, a1, t1
+
+    cmplt           t3, t0              // if(firstIndex + numPoints) > ((srcAlen + (srcBlen - 1u)
+    bf              .L0
+    movi            a0, 0               // if branch
+    subi            a0, a0, 1
+    br              .L51
+
+.L0:                                    // else branch
+    cmphs           a1, a3              // if(srcALen >= srcBLen)
+    bt              .L1
+
+    mov             l2, a0              // else branch
+    mov             a0, a2
+    mov             a2, l2
+
+    mov             l2, a1
+    mov             a1, a3
+    mov             a3, l2
+
+.L1:
+    subi            t1, a3, 1
+    sub.s32.s       l2, t1, l0          // blockSize1
+    blsz            l2, .L2
+    cmplt           t1, t0
+    bt              .L3
+    mov             l2, l1
+    br              .L3
+
+.L2:
+    movi            l2, 0
+
+    /* --------------------------
+     * Initializations of stage1
+     * -------------------------*/
+.L3:
+    lsli            t0, l0, 2
+    add             l3, l9, t0          // pOut  = pDst + firstIndex
+    addi            l4, l0, 1           // count = 1u + firstIndex
+    mov             l5, a0              // px    = pIn1
+    add             l8, a2, t0
+    mov             l6, l8              // py    = pIn2 + firstIndex
+
+    /* ---------------------------
+     *      Stage1 processing
+     * --------------------------*/
+
+    bez             l2, .L12            // while(blockSize1 > 0)
+    mov             t1, l2
+.L4:
+    movi            t8, 0               // sum = 0
+    lsri            t0, l4, 2           // k   = count >> 2u
+    bez             t0, .L7             // while(k > 0u)
+
+.L5:
+    pldbi.d         t2, (l5)
+    ld.w            t4, (l6, 0x0)
+    subi            l6, l6, 4
+    mula.s32.hs     t8, t2, t4          // x[0] * y[srcBLen - 1]
+    ld.w            t4, (l6, 0x0)
+    subi            l6, l6, 4
+    mula.s32.hs     t8, t3, t4          // x[1] * y[srcBLen - 2]
+
+    pldbi.d         t2, (l5)
+    ld.w            t4, (l6, 0x0)
+    subi            l6, l6, 4
+    mula.s32.hs     t8, t2, t4          // x[2] * y[srcBLen - 3]
+    ld.w            t4, (l6, 0x0)
+    subi            l6, l6, 4           // x[3] * y[srcBLen - 4]
+
+.L6:
+    mula.s32.hs     t8, t3, t4
+    bloop           t0, .L5, .L6
+
+.L7:
+    andi            t0, l4, 3           // k = count % 0x4u
+    bez             t0, .L10            // while(k > 0)
+
+.L8:
+    ldbi.w          t2, (l5)            // sum
+    ld.w            t3, (l6, 0x0)
+    subi            l6, l6, 4
+
+.L9:
+    mula.s32.hs     t8, t2, t3
+    bloop           t0, .L8, .L9
+
+.L10:
+    lsli.s32.s      t8, t8, 1           // process and store the result
+    stbi.w          t8, (l3)
+
+    addi            l8, l8, 4
+    mov             l6, l8              // py = ++ pSrc2
+    mov             l5, a0              // px = pIn1
+    addi            l4, l4, 1           // count++
+
+.L11:
+    subi            t1, t1, 1           // blockSize1--
+    bhz             t1, .L4
+
+    /* -------------------------
+     * Initializations of stage2
+     * -----------------------*/
+
+.L12:
+    subi            t1, a3, 1
+    sub.s32.s       t0, l0, t1
+    blsz            t0, .L13            // if(firstIndex - srcBLen +1 > 0)
+
+    lsli            l9, t0, 2
+    add             l7, a0, l9
+    br              .L14
+
+.L13:
+    mov             l7, a0
+
+.L14:
+    mov             l5, l7              // px    = pSrc1
+    lsli            l9, t1, 2
+    add             l8, a2, l9
+    mov             l6, l8              // py    = pIn2 + (srcBLen - 1u)
+    movi            l4, 0               // count = 0u
+
+    add             l9, l0, l1
+    cmplt           a1, l9
+    bf              .L15
+    sub.s32.s       t2, l9, a1
+    br              .L16
+
+.L15:
+    movi            t2, 0
+
+.L16:
+    subi            t1, a1, 1
+    cmplt           t1, l0              // blockSize3
+    bf              .L17
+    sub.s32.s       t2, t2, l0
+    sub.s32.s       t2, t2, a1
+
+.L17:
+    add             t3, t2, l2          // blockSize2
+    sub.s32.s       t3, l9, t3
+    sub.s32.s       t3, t3, l0
+    bhz             t3, .L18
+    movi            t3, 0
+
+    /* -----------------------
+     *    Stage2 processing
+     * ----------------------*/
+
+.L18:
+    mov             l0, t3
+    mov             l1, t2
+
+    cmphsi          a3, 4               // if(srcBLen >= 4u)
+    bf              .L37
+
+.L19:
+    lsri            t0, l0, 2           // blkCnt = blockSize2 >> 2u
+    bez             t0, .L28            // while(blkCnt > 0)
+
+.L20:
+    movi            t6, 0               // acc0 = 0
+    movi            t7, 0               // acc1 = 0
+    movi            t8, 0               // acc2 = 0
+    movi            t9, 0               // acc3 = 0
+
+    pldbi.d         t2, (l5)            // load x[0] and x[1] samples
+    ldbi.w          t4, (l5)
+    lsri            t1, a3, 2           // k    = srcBLen >> 2
+
+.L21:
+    ld.w            l9, (l6, 0x0)       // c0 = *(py)--
+    subi            l6, l6, 4           //
+    ldbi.w          t5, (l5)            // x3 = *px++
+    mula.s32.hs     t6, t2, l9          // acc0
+    mula.s32.hs     t7, t3, l9          // acc1
+    mula.s32.hs     t8, t4, l9          // acc2
+    mula.s32.hs     t9, t5, l9          // acc3 
+
+    ld.w            l9, (l6, 0x0)       // c0 = *py--
+    subi            l6, l6, 4
+    ldbi.w          t2, (l5)            // x0 = *px++
+    mula.s32.hs     t6, t3, l9          // acc0
+    mula.s32.hs     t7, t4, l9          // acc1
+    mula.s32.hs     t8, t5, l9          // acc2
+    mula.s32.hs     t9, t2, l9          // acc3
+
+    ld.w            l9, (l6, 0x0)       // c0 = *py--
+    subi            l6, l6, 4
+    ldbi.w          t3, (l5)            // x1 = *px++
+    mula.s32.hs     t6, t4, l9          // acc0
+    mula.s32.hs     t7, t5, l9          // acc1
+    mula.s32.hs     t8, t2, l9          // acc2
+    mula.s32.hs     t9, t3, l9          // acc3
+
+    ld.w            l9, (l6, 0x0)       // c0 = *py--
+    subi            l6, l6, 4
+    ldbi.w          t4, (l5)            // x2 = *px++
+    mula.s32.hs     t6, t5, l9          // acc0
+    mula.s32.hs     t7, t2, l9          // acc1
+    mula.s32.hs     t8, t3, l9          // acc2
+
+.L22:
+    mula.s32.hs     t9, t4, l9          // acc3
+    bloop           t1, .L21, .L22
+
+.L23:
+    andi            t1, a3, 3           // k = srcBLen % 0x4u
+    bez             t1, .L26            // while(k > 0u)
+
+.L24:
+    ld.w            l9, (l6, 0x0)       // c0 = *py--
+    subi            l6, l6, 4
+    ldbi.w          t5, (l5)            // x3 = *px++
+    mula.s32.hs     t6, t2, l9          // acc0
+    mula.s32.hs     t7, t3, l9          // acc1
+    mula.s32.hs     t8, t4, l9          // acc2
+    mula.s32.hs     t9, t5, l9          // acc3
+
+    mov             t2, t3              // x0 = x1
+    mov             t3, t4              // x1 = x2
+
+.L25:
+    mov             t4, t5              // x2 = x3
+    bloop           t1, .L24, .L25
+
+.L26:
+    lsli.s32.s      t6, t6, 1           // process and store the results
+    lsli.s32.s      t7, t7, 1
+    lsli.s32.s      t8, t8, 1
+    lsli.s32.s      t9, t9, 1
+    stbi.w          t6, (l3)
+    stbi.w          t7, (l3)
+    stbi.w          t8, (l3)
+    stbi.w          t9, (l3)
+
+    addi            l4, l4, 4           // count += 4u
+    lsli            t9, l4, 2
+    add             l5, l7, t9          // px     = pSrc1 + count
+    mov             l6, l8              // py     = pSrc2
+
+.L27:
+    subi            t0, t0, 1           // blkCnt--
+    bhz             t0, .L20
+
+.L28:
+    andi            t0, l0, 3           // blkCnt = blockSize2 % 0x4u
+    bez             t0, .L42            // while(blkCnt > 0)
+
+.L29:
+    movi            t8, 0               // sum = 0
+
+    lsri            t1, a3, 2           // k = srcBLen >> 2u
+    bez             t1, .L32            // while(k > 0)
+
+.L30:
+    pldbi.d         t2, (l5)            // perform the multiply-accumulates
+    ld.w            l9, (l6, 0x0)
+    subi            l6, l6, 4
+    mula.s32.hs     t8, t2, l9
+    ld.w            l9, (l6, 0x0)
+    subi            l6, l6, 4
+    mula.s32.hs     t8, t3, l9
+
+    pldbi.d         t2, (l5)
+    ld.w            l9, (l6, 0x0)
+    subi            l6, l6, 4
+    mula.s32.hs     t8, t2, l9
+    ld.w            l9, (l6, 0x0)
+    subi            l6, l6, 4
+
+.L31:
+    mula.s32.hs     t8, t3, l9
+    bloop           t1, .L30, .L31
+
+.L32:
+    andi            t1, a3, 3           // k = srcBLen % 0x4u
+    bez             t1, .L35
+
+.L33:
+    ldbi.w          t2, (l5)            // sum
+    ld.w            t3, (l6, 0x0)
+    subi            l6, l6, 4
+
+.L34:
+    mula.s32.hs     t8, t2, t3
+    bloop           t1, .L33, .L34
+
+.L35:
+    lsli.s32.s      t8, t8, 1
+    stbi.w          t8, (l3)
+
+    addi            l4, l4, 1           // count++
+    lsli            t9, l4, 2
+    add             l5, l7, t9          // px = pSrc1 + count
+    mov             l6, l8              // py = pSrc2
+
+.L36:
+    subi            t0, t0, 1           // blkCnt--
+    bhz             t0, .L29
+    br              .L42
+
+.L37:                                   // else branch
+    mov             t0, l0
+    bez             t0, .L42            // while(blkCnt > 0u)
+
+.L38:   
+    movi            t8, 0               // sum = 0
+
+    mov             t1, a3              // k   = srcBLen
+
+.L39:
+    ldbi.w          t2, (l5)            // sum
+    ld.w            t3, (l6, 0x0)
+    subi            l6, l6, 4
+
+.L40:
+    mula.s32.hs     t8, t2, t3
+    bloop           t1, .L39, .L40
+
+    lsli.s32.s      t8, t8, 1
+    stbi.w          t8, (l3)
+    addi            l4, l4, 1           // count++
+    lsli            t9, l4, 2
+    add             l5, l7, t9          // px = pSrc1 + count
+    mov             l6, l8              // py = pSrc2
+
+.L41:
+    subi            t0, t0, 1           // blkCnt--
+    bhz             t0, .L38
+
+    /* --------------------------
+     * Initializations of stage3
+     * ------------------------*/
+
+.L42:
+    subi            l4, a3, 1           // count = srcBLen - 1u
+    sub             t0, a1, l4
+    lsli            t0, t0, 2
+    add             l7, a0, t0
+    mov             l5, l7              // px    = pSrc1
+    lsli            t0, l4, 2
+    add             l8, a2, t0
+    mov             l6, l8              // py    = pSrc2
+
+    /* -------------------------
+     *     Stage3 processing
+     * -----------------------*/
+
+    mov             l0, l1
+    bez             l0, .L50            // while(blockSize3 > 0)
+
+.L52:
+    movi            t8, 0               // sum = 0
+
+    lsri            t0, l4, 2           // k = count >> 2u
+    bez             t0, .L45            // while(k > 0u)
+
+.L43:
+    pldbi.d         t2, (l5)
+    ld.w            t4, (l6, 0x0)
+    subi            l6, l6, 4
+    mula.s32.hs     t8, t2, t4          // sum
+    ld.w            t4, (l6, 0x0)
+    subi            l6, l6, 4
+    mula.s32.hs     t8, t3, t4
+
+    pldbi.d         t2, (l5)
+    ld.w            t4, (l6, 0x0)
+    subi            l6, l6, 4
+    mula.s32.hs     t8, t2, t4
+    ld.w            t4, (l6, 0x0)
+    subi            l6, l6, 4
+
+.L44:
+    mula.s32.hs     t8, t3, t4
+    bloop           t0, .L43, .L44
+
+.L45:
+    andi            t0, l4, 3           // k = count % 0x4u
+    bez             t0, .L48
+
+.L46:
+    ldbi.w          t2, (l5)
+    ld.w            t3, (l6, 0x0)
+    subi            l6, l6, 4
+
+.L47:
+    mula.s32.hs     t8, t2, t3
+    bloop           t0, .L46, .L47
+
+.L48:
+    lsli.s32.s      t8, t8, 1
+    stbi.w          t8, (l3)
+
+    addi            l7, l7, 4
+    mov             l5, l7
+    mov             l6, l8
+
+.L49:
+    subi            l4, l4, 1           // count--
+    subi            l0, l0, 1           // blockSize3--
+    bhz             l0, .L52
+
+.L50:
+    movi            a0, 0
+
+.L51:
+    pop             l0, l1, l2, l3, l4, l5, l6, l7, l8, l9
+    .size           csky_conv_partial_fast_q31, .-csky_conv_partial_fast_q31

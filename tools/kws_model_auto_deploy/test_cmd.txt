@@ -1,0 +1,3 @@
+./kwsModelAutoDeploy -i ./test_model -r /disk3/github_lvp_kws/lvp_kws -p xiaoshu_aiot -dv v.0.1.0
+
+
