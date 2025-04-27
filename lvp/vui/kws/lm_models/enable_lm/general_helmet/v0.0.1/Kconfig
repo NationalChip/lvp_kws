@@ -1,0 +1,29 @@
+
+if LVP_LM_GENERAL_HELMEL_V0DOT0DOT1_2021_0423
+    config KWS_MODEL_BEAMSEARCH_AND_LM_ALPHA
+        default 9
+
+    config KWS_MODEL_BEAMSEARCH_AND_LM_BETA
+        default 11
+
+    config KWS_MODEL_BEAMSEARCH_AND_LM_CUTOFF_TOP_N
+        default 10
+
+    menu "LM Model Param Setting:"
+        config BEAM_SIZE
+            int "BeamSearch Size"
+            default 3
+
+        config PREFIX_CHAR_LENGTH
+            int "BeamSearch Prefix Char Length"
+            default 8
+
+        config LEVENSHTEIN_THRESHOLD
+            int "Levenshtein Threshold (x100)"
+            default 25
+
+        config DIMSIM_THRESHOLD
+            int "Dimsim Threshold (x100)"
+            default 100
+    endmenu
+endif

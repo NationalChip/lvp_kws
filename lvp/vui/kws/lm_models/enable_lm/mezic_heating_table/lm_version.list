@@ -1,0 +1,9 @@
+# Grus
+# Copyright (C) 2001-2019 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: 
+#---------------------------------------------------------------------------------#
+if LVP_LM_MEZIC_HEATING_TABLE
+    source "lvp/vui/kws/lm_models/enable_lm/mezic_heating_table/*/lm_version.name"
+endif

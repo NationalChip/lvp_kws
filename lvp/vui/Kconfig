@@ -31,6 +31,22 @@ menu "VUI Settings"
         default y
 
     comment ""
+    config LVP_ADVANCE_HUMAN_VAD_ENABLE
+        bool "Enable Advance Human Vad"
+        default n
+    config LVP_VALID_ADVANCE_HUMAN_VAD_NUM
+        int "Number of valid advance human vad, use for filter valid human vad, unit by context"
+        default 0
+        depends on LVP_ADVANCE_HUMAN_VAD_ENABLE
+    config LVP_INVALID_ADVANCE_HUMAN_VAD_NUM
+        int "Number of invalid advance human vad, use for filter invalid human vad, unit by context"
+        default 5
+        depends on LVP_ADVANCE_HUMAN_VAD_ENABLE
+    config LVP_ADVANCE_HUMAN_VAD_THRESHOLD
+        int "Advance Human Vad Threshold(x100)"
+        default 90
+        depends on LVP_ADVANCE_HUMAN_VAD_ENABLE
+    comment ""
 
     comment "ENV Noise Judgment Settings:"
     config ENABLE_NOISE_JUDGEMENT

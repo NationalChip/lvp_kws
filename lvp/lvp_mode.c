@@ -20,6 +20,7 @@ extern const LVP_MODE_INFO lvp_denoise_mode_info;
 extern const LVP_MODE_INFO lvp_nn_denoise_mode_info;
 extern const LVP_MODE_INFO lvp_fft_recover_mode_info;
 extern const LVP_MODE_INFO lvp_sed_mode_info;
+extern const LVP_MODE_INFO lvp_pitchshift_mode_info;
 
 static const LVP_MODE_INFO *s_lvp_mode_list[] = {
     &lvp_idle_mode_info,
@@ -43,6 +44,9 @@ static const LVP_MODE_INFO *s_lvp_mode_list[] = {
 #endif
 #ifdef CONFIG_LVP_HAS_SED_MODE
     &lvp_sed_mode_info,
+#endif
+#ifdef CONFIG_LVP_HAS_PITCH_SHIFT_MODE
+    &lvp_pitchshift_mode_info,
 #endif
 };
 

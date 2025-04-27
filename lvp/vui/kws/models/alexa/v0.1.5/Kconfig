@@ -1,0 +1,33 @@
+
+menu "Model Param Setting:"
+    depends on LVP_KWS_ALEXA_V0DOT1DOT5_2020_20
+
+    config KWS_MODEL_SUPPORT_SOFTMAX
+      default y
+    # Byte
+    config KWS_SNPU_BUFFER_SIZE
+        default 2200
+
+    # Frames
+    config KWS_MODEL_FEATURES_DIM_PER_FRAME
+        default 40
+
+    config KWS_MODEL_INPUT_STRIDE_LENGTH
+        default 4
+
+    config KWS_MODEL_INPUT_WIN_LENGTH
+        default 11
+
+    config KWS_MODEL_OUTPUT_LENGTH
+        default 42
+
+    config KWS_MODEL_DECODER_STRIDE_LENGTH
+        int "KWS Lantency (unit of Context)"
+        default 1
+        range 1 4
+
+    config KWS_MODEL_DECODER_WIN_LENGTH
+        int "KWS Model Decoder Window Length (unit of context)"
+        default 25
+endmenu
+

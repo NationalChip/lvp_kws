@@ -11,6 +11,7 @@
 //#include <kws_list.h>
 
 #include <syllable_table.h>
+#include <tiny-regex-c/re.h>
 #include <levenshtein/levenshtein.h>
 #include <dimsim/dimsim.h>
 
@@ -135,6 +136,10 @@ int LvpDoBeamSearch(LVP_CONTEXT        *context,
     if (g_kws_list.kws_param_list[ctc_kws_index].kws_value != CONFIG_KEYWORD_SHANG_YI_SHOU_VALUE) return 0;
 #endif
 
+#ifdef CONFIG_LVP_KWS_DRYER_DOUBLE_V0DOT0DOT1_2023_0427
+    return 0;
+#endif
+
     _ClearPrefixList(CONFIG_BEAM_SIZE, prefix_list);
     int beam_size = 0;
     int win_length = CONFIG_KWS_MODEL_DECODER_WIN_LENGTH;
@@ -164,7 +169,7 @@ int LvpDoBeamSearch(LVP_CONTEXT        *context,
                     , CONFIG_KWS_MODEL_BEAMSEARCH_AND_LM_CUTOFF_TOP_N
                     , prefix_list
                     , context);
-    
+
         if (p >= win_length - 1) {
             memcpy (&g_prefix[0], prefix_list, CONFIG_BEAM_SIZE*sizeof(PREFIX_LIST));
 
@@ -179,7 +184,6 @@ int LvpDoBeamSearch(LVP_CONTEXT        *context,
 #endif
 
             for (int i = 0; i < CONFIG_BEAM_SIZE; i++) {
-                
                 for (int j = 0; j < g_kws_list.count; j++) {
                     if (prefix_length[i] < g_kws_list.kws_param_list[j].label_length-1) continue;
 

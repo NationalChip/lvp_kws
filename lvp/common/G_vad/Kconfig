@@ -1,0 +1,110 @@
+#
+# Grus
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Common function Kconfig
+#---------------------------------------------------------------------------------#
+
+
+
+choice
+    prompt "Select Version:"
+    default LVP_G_SENSOR_VAD_V1
+
+    config LVP_G_SENSOR_VAD_V1
+        bool "V1"
+
+    config LVP_G_SENSOR_VAD_V2
+        bool "V2"
+
+    config LVP_G_SENSOR_VAD_V3
+        bool "V3"
+endchoice
+
+
+
+if LVP_G_SENSOR_VAD_V1
+
+    config LVP_G_SENSOR_VAD_FRAME_SHIFT
+        int "G sensor Vad frame shift"
+        default 16
+
+    config LVP_G_SENSOR_VAD_ENERGY_THRESHOLD
+        int "G sensor energy Vad threshold ( * 0.01)"
+        default 13
+
+    config LVP_G_SENSOR_VAD_VOICE_COUNT_WINDOW
+        int "Window for count efficacious voice frame"
+        default 128
+
+    config LVP_G_SENSOR_VAD_VOICE_COUNT_THRESHOLD
+        int "Threshold of continuously efficacious voice frame num to trigger vad"
+        default 9
+
+    config LVP_G_SENSOR_FFT_RESULT_COUNT_THRESHOLD
+        int "Threshold of trigged vad stride num to trigger vad"
+        default 1
+        range 1 32
+
+    config LVP_G_SENSOR_VAD_HOLD_CONTEXT_NUM
+        int "G sensor Vad hold context num"
+        default 1
+endif
+
+if LVP_G_SENSOR_VAD_V2
+
+    config LVP_G_SENSOR_VAD_FRAME_SHIFT
+        int "G sensor Vad frame shift"
+        default 16
+
+    config LVP_G_SENSOR_VAD_ENERGY_THRESHOLD
+        int "G sensor energy Vad threshold ( * 0.001)"
+        default 115
+
+    config LVP_G_SENSOR_VAD_VOICE_COUNT_WINDOW
+        int "Window for count efficacious voice frame"
+        default 132
+
+    config LVP_G_SENSOR_VAD_VOICE_COUNT_THRESHOLD
+        int "Threshold of continuously efficacious voice frame num to trigger vad"
+        default 5
+
+    config LVP_G_SENSOR_FFT_RESULT_COUNT_THRESHOLD
+        int "Threshold of trigged vad stride num to trigger vad"
+        default 55
+        range 1 128
+endif
+
+if LVP_G_SENSOR_VAD_V3
+    config LVP_G_SENSOR_VAD_FRAME_SHIFT
+        int "G sensor Vad frame shift"
+        default 16
+
+    config LVP_G_SENSOR_VAD_ENERGY_THRESHOLD_1
+        int "G sensor energy Vad threshold_1 ( * 0.001)"
+        default 140
+
+    config LVP_G_SENSOR_VAD_ENERGY_WINDOWS_1
+        int "G sensor energy Vad Window_1"
+        default 50
+
+    config LVP_G_SENSOR_VAD_ENERGY_THRESHOLD_2
+        int "G sensor energy Vad threshold_2"
+        default 10
+
+    config LVP_G_SENSOR_VAD_ENERGY_WINDOWS_2
+        int "G sensor energy Vad Window_2"
+        default 90
+
+    config LVP_G_SENSOR_BACKGRUND_NOISE_FILTER
+        int "Backgrund noise energy filter ( * 0.001)"
+        default 20
+
+    config LVP_G_SENSOR_VAD_VOICE_COUNT_THRESHOLD
+        int "Threshold of continuously efficacious voice frame num to trigger vad"
+        default 4
+
+endif
+#---------------------------------------------------------------------------------#
+

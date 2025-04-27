@@ -117,9 +117,15 @@ menu "Common Function Settings"
         comment "[WARNING] you should give more mem when encoded data decode failed or struck"
         endif
 
-        config LVP_VOICE_PLAYER_NUTE_PIN
+        config LVP_VOICE_PLAYER_MUTE_PIN
             int "Mute pin"
             default 2
+
+        config LVP_VOICE_PLAYER_MUTE_PIN_LEVEL_STATUS
+            int "Mute Pin Level Status"
+            default 0
+            range 0 1
+
         choice
             prompt "dac channel select"
             default VOICE_PLAYER_DAC_STEREO
@@ -149,9 +155,14 @@ menu "Common Function Settings"
             bool
             default y
 
-        config LVP_MP3_PLAYER_NUTE_PIN
+        config LVP_MP3_PLAYER_MUTE_PIN
             int "Mute pin"
             default 2
+
+        config LVP_MP3_PLAYER_MUTE_PIN_LEVEL_STATUS
+            int "Mute Pin Level Status"
+            default 0
+            range 0 1
 
         choice
             prompt "dac channel select"

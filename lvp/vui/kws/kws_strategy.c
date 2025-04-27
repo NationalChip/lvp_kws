@@ -47,7 +47,7 @@ static LVP_KWS_PARAM *_GetKwsParamByKwsIndex(int kws_index, char *kws_words)
 
     return NULL;
 }
-static BIONIC s_bionic = { 0 };
+
 void KwsStrategyInit(void)
 {
     memset ((void *)&s_activation_kws_list, 0, sizeof(LVP_ACTIVATION_KWS_LIST));
@@ -58,24 +58,11 @@ void KwsStrategyReset(void)
     memset ((void *)&s_activation_kws_list, 0, sizeof(LVP_ACTIVATION_KWS_LIST));
 }
 
-void KwsStrategyClearBunkwsThresholdOffset(void)
-{
-#ifdef CONFIG_LVP_ENABLE_BUNKWS_BIONIC
-    s_bionic.bunkws_context_counter = 0;
-    s_bionic.bunkws_threshold_offset = 0.f;
-#endif
-}
-
-float KwsStrategyGetBunkwsThresholdOffset(LVP_CONTEXT *context, float threshold)
-{
-    return s_bionic.bunkws_threshold_offset;
-}
-
 void KwsStragegyInsertKwsActivation(int kws_index, int kws_value, float kws_score, int score_index, void *priv)
 {
     for (int i = 0; i < s_activation_kws_list.total; i++) {
         LVP_ACTIVATION_KWS *activation_kws = &s_activation_kws_list.activation_kws[i];
-        if ((activation_kws->kws_value == kws_value) && (activation_kws->kws_index = kws_index)) {
+        if ((activation_kws->kws_value == kws_value) && (activation_kws->kws_index == kws_index)) {
             if (kws_score > activation_kws->kws_score) {
                 activation_kws->kws_score = kws_score;
             }
@@ -83,6 +70,10 @@ void KwsStragegyInsertKwsActivation(int kws_index, int kws_value, float kws_scor
         }
     }
     int index = s_activation_kws_list.total;
+    if (index >= sizeof(s_activation_kws_list.activation_kws) / sizeof(s_activation_kws_list.activation_kws[0])) {
+        printf(LOG_TAG "==ERROR== Array [activation_kws] overflow\n");
+        return;
+    }
     LVP_ACTIVATION_KWS *activation_kws = &s_activation_kws_list.activation_kws[index];
     activation_kws->kws_index = kws_index;
     activation_kws->kws_value = kws_value;
@@ -105,7 +96,7 @@ LVP_ACTIVATION_KWS *KwsStragegyRun(LVP_CONTEXT *context)
     }
 #endif
 
-    LVP_ACTIVATION_KWS *activation_kws   = &s_activation_kws_list.activation_kws[0];
+    LVP_ACTIVATION_KWS *activation_kws = &s_activation_kws_list.activation_kws[0];
     float score_difference = 0.f;
     float difference = 0.f;
     for (int i = 0; i < s_activation_kws_list.total; i++) {
@@ -190,7 +181,7 @@ LVP_ACTIVATION_KWS *KwsStragegyRun(LVP_CONTEXT *context)
             // printf (LOG_TAG"%d, %d\n", ((kws_level_type&KWS_LEVEL_END) == KWS_LEVEL_END)
             // , ((KWS_LEVEL_TOP1 == last_kws_decoder_type) || (KWS_LEVEL_TOP2 == last_kws_decoder_type)));
             if (0 == kws_level_type
-            || (((kws_level_type&last_kws_decoder_type) == last_kws_decoder_type)
+            || (((kws_level_type&KWS_LEVEL_TOP_MASK) == last_kws_decoder_type)
             && ((kws_level_type&(last_kws_decoder_type|KWS_LEVEL_END)) == (last_kws_decoder_type|KWS_LEVEL_END)))) {
                 if (kws_level_type == 0) last_top_kws = "";
 
@@ -204,7 +195,7 @@ LVP_ACTIVATION_KWS *KwsStragegyRun(LVP_CONTEXT *context)
                 // float j_score = last_top_sore*activation_kws->kws_score;
                 // float j_th = 8500.f;
                 // if (KWS_LEVEL_TOP4 == last_kws_decoder_type)
-                
+
                 int jc_threshold = kws_list->kws_param_list[activation_kws->kws_index].js_threshold;
                 if (j_score < (float)jc_threshold) {
                     printf (LOG_TAG" JS_Act! JS_Act_Kws:[%s %s,%d],KV:%d,S:%d,J_S:%f[%d],ctx:%d\n"
@@ -273,8 +264,7 @@ LVP_ACTIVATION_KWS *KwsStragegyRun(LVP_CONTEXT *context)
 }
 
 //=================================================================================================
-
-static float threshold_offset = 0.f;
+static BIONIC s_bionic = { 0 };
 float KwsStrategyGetThresholdOffset(LVP_CONTEXT *context, float threshold)
 {
     LVP_CONTEXT *prev_context;
@@ -287,42 +277,67 @@ float KwsStrategyGetThresholdOffset(LVP_CONTEXT *context, float threshold)
         if (threshold > 90) ns_threshold_offset = 1;
         else ns_threshold_offset = 2;
     }
-    return threshold_offset + ns_threshold_offset;
+    return s_bionic.ctc_threshold_offset + ns_threshold_offset;
 }
 
-#ifdef CONFIG_LVP_ENABLE_BIONIC
-static int context_counter = 0;
-#endif
+float KwsStrategyGetBunkwsThresholdOffset(LVP_CONTEXT *context, float threshold)
+{
+    return s_bionic.bunkws_threshold_offset;
+}
+
+
 void KwsStrategyClearThresholdOffset(void)
 {
-#ifdef CONFIG_LVP_ENABLE_BIONIC
-    context_counter  = 0;
-    threshold_offset =  0.f;
-    // printf(LOG_TAG" reset th_offset: %d\n", (int)(threshold_offset*10));
+#ifdef CONFIG_LVP_ENABLE_CTC_BIONIC
+    s_bionic.ctc_context_counter = 0;
+    s_bionic.ctc_threshold_offset = 0.f;
+#endif
+}
+
+void KwsStrategyClearBunkwsThresholdOffset(void)
+{
+#ifdef CONFIG_LVP_ENABLE_BUNKWS_BIONIC
+    s_bionic.bunkws_context_counter = 0;
+    s_bionic.bunkws_threshold_offset = 0.f;
 #endif
 }
 
 __attribute__((unused)) int KwsStrategyRunBionic(LVP_CONTEXT *context, LVP_KWS_PARAM *kws, float score, float threshold, float *decoder_window)
 {
-#ifdef CONFIG_LVP_ENABLE_BIONIC
+# if defined CONFIG_LVP_ENABLE_CTC_BIONIC || defined CONFIG_LVP_ENABLE_BUNKWS_BIONIC
     LVP_CONTEXT_HEADER *ctx_header = context->ctx_header;
     int ctx_ms = ctx_header->frame_length * ctx_header->pcm_frame_num_per_context;
-    context_counter ++;
-
     // CONFIG_LVP_KWS_THRESHOLD_ADJUST_TIME s
     LVP_KWS_PARAM_LIST *kws_list = LvpGetKwsParamList();
-    int time_out = CONFIG_LVP_KWS_THRESHOLD_ADJUST_TIME * 1000 * kws_list->count / CONFIG_KWS_MODEL_DECODER_STRIDE_LENGTH;
-
-    if (context_counter * ctx_ms > time_out && threshold_offset < CONFIG_LVP_KWS_MAX_THRESHOLD_ADJUSTMENT_VALUE/10.f) {
-        context_counter   = 0;
-        threshold_offset += CONFIG_LVP_KWS_THRESHOLD_STEP/10.f;
-        printf(LOG_TAG"threshold_offset: %d\n",  (int)(threshold_offset*10));
+# ifdef CONFIG_LVP_ENABLE_CTC_BIONIC
+    int ctc_time_out = CONFIG_LVP_KWS_THRESHOLD_ADJUST_TIME * 1000 * kws_list->count / CONFIG_KWS_MODEL_DECODER_STRIDE_LENGTH;
+    s_bionic.ctc_context_counter ++;
+    if (s_bionic.ctc_context_counter * ctx_ms > ctc_time_out && s_bionic.ctc_threshold_offset < CONFIG_LVP_KWS_MAX_THRESHOLD_ADJUSTMENT_VALUE/10.f) {
+        s_bionic.ctc_context_counter   = 0;
+        if (s_bionic.ctc_threshold_offset + CONFIG_LVP_KWS_THRESHOLD_STEP > CONFIG_LVP_KWS_MAX_THRESHOLD_ADJUSTMENT_VALUE)
+            s_bionic.ctc_threshold_offset = CONFIG_LVP_KWS_MAX_THRESHOLD_ADJUSTMENT_VALUE;
+        else
+            s_bionic.ctc_threshold_offset += CONFIG_LVP_KWS_THRESHOLD_STEP/10.f;
+        printf(LOG_TAG"ctc threshold_offset: %d\n", (int)(s_bionic.ctc_threshold_offset*10));
     }
-#endif
+# endif
 
+
+# ifdef CONFIG_LVP_ENABLE_BUNKWS_BIONIC
+    int bunkws_time_out = CONFIG_LVP_BUNKWS_THRESHOLD_ADJUST_TIME * 1000 * kws_list->count / CONFIG_KWS_MODEL_DECODER_STRIDE_LENGTH;
+    s_bionic.bunkws_context_counter ++;
+    if (s_bionic.bunkws_context_counter * ctx_ms > bunkws_time_out && s_bionic.bunkws_threshold_offset < CONFIG_LVP_BUNKWS_MAX_THRESHOLD_ADJUSTMENT_VALUE) {
+        s_bionic.bunkws_context_counter   = 0;
+        if (s_bionic.bunkws_threshold_offset + CONFIG_LVP_BUNKWS_KWS_THRESHOLD_STEP > CONFIG_LVP_BUNKWS_MAX_THRESHOLD_ADJUSTMENT_VALUE)
+            s_bionic.bunkws_threshold_offset = CONFIG_LVP_BUNKWS_MAX_THRESHOLD_ADJUSTMENT_VALUE;
+        else
+            s_bionic.bunkws_threshold_offset += CONFIG_LVP_BUNKWS_KWS_THRESHOLD_STEP;
+        printf(LOG_TAG"bunkws threshold_offset: %d\n", (int)(s_bionic.bunkws_threshold_offset));
+    }
+# endif
+#endif
     return 0;
 }
-
 //=================================================================================================
 
 __attribute__((unused)) float KwsStrategyFineTuneScore(LVP_CONTEXT *context, float score)

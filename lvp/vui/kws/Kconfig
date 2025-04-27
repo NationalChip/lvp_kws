@@ -54,19 +54,37 @@ config NPU_TOTAL_SIZE
 
 #---------------------------------------------------------------------------------#
 
+config ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+    bool "Enable CTC_KWS and BUN_KWS Dual Model Cascading"
+    depends on LVP_ENABLE_CTC_DECODER
+    default n
+    help
+        "Only support to select ctc_decoder"
+
+if ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+    config LVP_ENTER_MODEL2_THRESHOLD
+        int "The Threshold Of Enter Model2"
+        default 950
+        range 900 1000
+        help
+            "If the ctc score exceeds this threshold, the judgment of the model2 will not be made;"
+endif
+
 choice
     prompt "Keyword Decoder Type"
     default LVP_ENABLE_CTC_DECODER
     config LVP_ENABLE_CTC_DECODER
-        bool "Ctc Decoder"
+        bool "CTC Decoder"
+    config LVP_ENABLE_CTC_GX_DECODER
+        bool "CTC GX Deocder"
     config LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER
         bool "CTC And Beamsearch Decoder"
     config LVP_ENABLE_BEAMSEARCH_DECODER
         bool "Beamsearch Decoder without CTC"
+    config LVP_ENABLE_USER_DECODER
+        bool "User Deocder"
     config LVP_ENABLE_MAX_DECODER
         bool "Max Deocder"
-    config LVP_ENABLE_USER_DECODER
-        bool "User Deocder" 
 endchoice
 
 if LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER
@@ -74,6 +92,37 @@ if LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER
         int "Filter Low Ctc Scores Threshold When Bm is False(x10)"
         default 0
         range 0 1000
+endif
+
+if LVP_ENABLE_MAX_DECODER
+    config KWS_MAX_DECODER_WIN_LENGTH
+        int "Max Decoder Determines The Active Window Length"
+        default 5
+        range 5 20
+    config MODEL_ACTIVATION_NUMBERS
+        int "Max Decoder Activation Requires The Number of Model Activations"
+        default 2
+        range 1 4
+endif
+
+if LVP_ENABLE_CTC_GX_DECODER
+    config ENABLE_USED_FOR_ALL_GRUS_FAMILY
+        bool "Enable Used For All Grus Family"
+        default y
+    config ENABLE_DO_NOT_SLEEP_WHEN_AT_WAKE_UP
+        bool "Enable Do not sleep when at wake up"
+        default y
+    config ENABLE_SWITCH_NPU_MODEL_RUN_IN_FLASH_OR_SRAM
+        bool "Enable Switch Npu Model Run In Flash Or Sram"
+        default n
+    config ENABLE_PRINTF_GXDECODER_MEMORY_MONITORING
+        bool "Enable GXdecoder Memory Monitoring"
+        default n
+    config BLANK_THRESHOLD_FOR_CTC_GX_DECODER
+        int "Blank Threshold For CTC GX Decoder(x1000)"
+        default 900
+    source "lvp/vui/kws/gxdecoder/Kconfig"
+    comment ""
 endif
 
 source "lvp/vui/kws/models/Kconfig"

@@ -32,6 +32,8 @@ DRAM0_STAGE2_SRAM_ATTR int main(int argc, char **argv)
     LvpInitMode(LVP_MODE_SED);
 #elif defined(CONFIG_LVP_INIT_WORKMODE_FFT_RECOVER)
     LvpInitMode(LVP_MODE_FFT_RECOVER);
+#elif defined(CONFIG_LVP_INIT_WORKMODE_PITCH_SHIFT)
+    LvpInitMode(LVP_HAS_PITCH_SHIFT_MODE);
 #else
     LvpInitMode(LVP_MODE_IDLE);
 #endif

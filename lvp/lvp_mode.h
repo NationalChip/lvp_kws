@@ -19,6 +19,7 @@ typedef enum {
     LVP_MODE_NN_DENOISE,
     LVP_MODE_FFT_RECOVER,
     LVP_MODE_SED,
+    LVP_HAS_PITCH_SHIFT_MODE,
     LVP_MODE_INIT_FLAG = 0xffff  // 模式初始化之前的模式状态
 } LVP_MODE_TYPE;
 typedef int  (*LVP_MODE_INIT)(LVP_MODE_TYPE prev_mode);

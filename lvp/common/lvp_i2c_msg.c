@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <driver/gx_hw_i2c.h>
 #include <lvp_pmu.h>
+#include <driver/gx_audio_in.h>
 #include "lvp_i2c_msg.h"
 #include <common.h>
 #include <string.h>
@@ -21,6 +22,7 @@
 #define ISR_TEST_LINK    0x80
 #define ISR_CONFIRM_LINK    0x11
 #define ISR_GET_SOFT_VERSTION 0x68       // 获取Soft Verstion
+#define ISR_MIC_STATE          0x70  // 获取MIC状态
 
 static char i2c_msg_initialized = 0;
 static I2C_EVENT_CONFIRM_CB event_confirm_cb;
@@ -33,6 +35,12 @@ typedef struct
     unsigned char SecondVerstion;
     unsigned char MainVerstion;
 }SOFT_VERSTION;
+
+#if defined(CONFIG_APP_DMIC_SWITCH_DEMO_HW_I2C) && defined(CONFIG_APP_VC_HAS_DMIC_SWITCH_PDM_MASTER)
+#include "../../app/dmic_switch_demo/vc_message.h"
+#define ISR_OPEN_DMIC_LINK      0x72  // 打开 Dmic
+#define ISR_CLOSE_DMIC_LINK     0x73  // 关闭 Dmic
+#endif
 
 static SOFT_VERSTION sv;
 
@@ -57,6 +65,28 @@ static void LvpSoftVerstion(void)
     gx_hw_i2c_write_reg(0xa4, sv.SecondVerstion);
     gx_hw_i2c_write_reg(0xa8, sv.CurrectVerstion);
     gx_hw_i2c_write_reg(0xac, sv.BuildVerstion);
+}
+
+static int MicGetInfo(void)
+{
+    static int once_vad = 0;
+    if (once_vad == 0)
+    {
+        int vad = LvpAudioInQueryFFTVad(NULL);
+        once_vad = vad;
+    }
+    return once_vad;
+}
+
+static void LvpGetMicState()
+{
+    printf("receive misc test cmd\n");
+    unsigned short send_event = 1;
+    if (!MicGetInfo())
+    {
+        send_event = 0;
+    }
+    gx_hw_i2c_write_reg(0xa0, send_event);
 }
 
 static int _lvpI2CMsgISR(void *private, unsigned char status)
@@ -87,9 +117,25 @@ static int _lvpI2CMsgISR(void *private, unsigned char status)
             gx_hw_i2c_write_reg(I2C_LINK_REG, 0);
             LvpPmuSuspendUnlock(pmu_lock);
             break;
+
         case ISR_GET_SOFT_VERSTION:
             LvpSoftVerstion();
             break;
+
+        case ISR_MIC_STATE:
+            LvpGetMicState();
+            break;
+#if defined(CONFIG_APP_DMIC_SWITCH_DEMO_HW_I2C) && defined(CONFIG_APP_VC_HAS_DMIC_SWITCH_PDM_MASTER)
+        case ISR_OPEN_DMIC_LINK:
+            LvpOpenDmic();
+            gx_hw_i2c_write_reg(0xa0, ISR_OPEN_DMIC_LINK);
+            break;
+
+        case ISR_CLOSE_DMIC_LINK:
+            LvpCloseDmic();
+            gx_hw_i2c_write_reg(0xa0, ISR_CLOSE_DMIC_LINK);
+            break;
+#endif
         default:
             break;
 

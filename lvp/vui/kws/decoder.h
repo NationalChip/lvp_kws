@@ -39,14 +39,16 @@ typedef enum
 
 int LvpSetVuiKwsStates(VUI_KWS_STATE state);
 int LvpGetVuiKwsStates(void);
+LVP_KWS_PARAM *LvpGetKwsInfo(int kws_kv);
 
+void ResetMaxWindow(void);
 void ResetCtcWinodw(void);
 void ResetCtcWinodwUser(int start, int len);
-float LvpCtcScoreKws(float* probs, int T, int alphabet_size, int blank, unsigned char *labels, int labels_length);
-float LvpFastCtcScore(float* probs, int T, int alphabet_size, int blank, unsigned char *labels, int labels_length);
-float LvpFastCtcBlockScore(float* probs, int T1, float* probs2, int T2, int alphabet_size, int blank, unsigned char * labels, int labels_length);
-float LvpFastCtcBlockScorePlus(float* probs, int T1, float* probs2, int T2, int alphabet_size, int blank, unsigned char * labels, int labels_length, int *score_index);
-int LvpFastCtcJudge(float* probs, int T1, float* probs2, int T2, int alphabet_size, int blank, unsigned char * labels, int labels_length, float threshold);
+float LvpCtcScoreKws(float* probs, int T, int alphabet_size, int blank, unsigned short *labels, int labels_length);
+float LvpFastCtcScore(float* probs, int T, int alphabet_size, int blank, unsigned short *labels, int labels_length);
+float LvpFastCtcBlockScore(float* probs, int T1, float* probs2, int T2, int alphabet_size, int blank, unsigned short * labels, int labels_length);
+float LvpFastCtcBlockScorePlus(float* probs, int T1, float* probs2, int T2, int alphabet_size, int blank, unsigned short * labels, int labels_length, int *score_index);
+int LvpFastCtcJudge(float* probs, int T1, float* probs2, int T2, int alphabet_size, int blank, unsigned short * labels, int labels_length, float threshold);
 void LvpInitCtcKws(void);
 void LvpPrintCtcKwsList(void);
 LVP_KWS_PARAM_LIST *LvpGetKwsParamList(void);
@@ -55,9 +57,6 @@ int LvpDoKwsScore(LVP_CONTEXT *context);
 int LvpDoUserDecoder(LVP_CONTEXT *context);
 float fastlogf (float x);
 
-void LvpInitMaxKws(void);
-int LvpDoMaxDecoder(LVP_CONTEXT *context);
-void LvpPrintMaxKwsList(void);
 
 # if defined(CONFIG_LVP_ENABLE_CTC_DECODER)||defined(CONFIG_LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER)
 int KwsCtcBeamSearchLmInit(unsigned char *lm, unsigned char *lst);
@@ -82,4 +81,29 @@ int KwsCtcBeamSearchScore(float          *probs_seq
         , PREFIX_LIST    *prefix_list
         , LVP_CONTEXT    *context);
 # endif
+
+int LvpSetCtcScore(int score);
+int LvpGetCtcScore(void);
+
+// max_decoder
+
+void LvpInitMaxKws(void);
+int LvpDoMaxDecoder(LVP_CONTEXT *context);
+void LvpPrintMaxKwsList(void);
+
+
+int LvpDoGXDecoder(LVP_CONTEXT *context
+                , float *decoder_window1
+                , int t1
+                , float *decoder_window2
+                , int t2
+                , char *ctc_words
+                , int ctc_words_size
+                , void *xdecoder_tmp_buffer
+                , int label_length
+                , int start_index
+                , char **gxdecoder_words);
+void LvpGXdecoderMemoryMonitoring(void);
+
+
 #endif /* __DECODER_H__ */

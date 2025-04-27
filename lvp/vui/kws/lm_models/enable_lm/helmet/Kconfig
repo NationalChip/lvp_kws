@@ -1,0 +1,17 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2019 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: LM Kconfig
+#---------------------------------------------------------------------------------#
+if LVP_LM_HELMET
+    choice
+        prompt "Language Models select:"
+        default LVP_LM_HELMEL_V0DOT0DOT2_2021_0304
+        source "lvp/vui/kws/lm_models/enable_lm/helmet/*/lm_version.name"
+    endchoice
+
+    # lm param kconfig
+    source "lvp/vui/kws/lm_models/enable_lm/helmet/*/Kconfig"
+endif
+

@@ -164,7 +164,7 @@ static void lvp_player_clear_frame_buffer(void)
 
 static void lvp_audio_out_exit(void)
 {
-    gx_gpio_set_level(CONFIG_LVP_MP3_PLAYER_NUTE_PIN, GX_GPIO_LEVEL_HIGH);
+    gx_gpio_set_level(CONFIG_LVP_MP3_PLAYER_MUTE_PIN, CONFIG_LVP_MP3_PLAYER_MUTE_PIN_LEVEL_STATUS);
     // player_info.status = PLAYER_STATUS_STOP;
     lvp_player_clear_frame_buffer();
 }
@@ -282,14 +282,14 @@ static void lvp_audio_out_init(void)
     cb.new_frame_callback = lvp_player_callback;
     cb.frame_over_callback = NULL;
 
-    gx_gpio_set_direction(CONFIG_LVP_MP3_PLAYER_NUTE_PIN, GX_GPIO_DIRECTION_OUTPUT);
-    gx_gpio_set_level(CONFIG_LVP_MP3_PLAYER_NUTE_PIN, GX_GPIO_LEVEL_HIGH);
+    gx_gpio_set_direction(CONFIG_LVP_MP3_PLAYER_MUTE_PIN, GX_GPIO_DIRECTION_OUTPUT);
+    gx_gpio_set_level(CONFIG_LVP_MP3_PLAYER_MUTE_PIN, CONFIG_LVP_MP3_PLAYER_MUTE_PIN_LEVEL_STATUS);
     gx_audio_out_config_buffer(handle, &buf);
     gx_audio_out_config_pcm(handle, &pcm);
     gx_audio_out_config_cb(handle, &cb);
     gx_audio_out_set_channel(handle, DAC_CHANNEL);
     gx_audio_out_set_db(handle, lvp_vol_to_db(player_info.volume));
-    gx_gpio_set_level(CONFIG_LVP_MP3_PLAYER_NUTE_PIN, GX_GPIO_LEVEL_LOW);
+    gx_gpio_set_level(CONFIG_LVP_MP3_PLAYER_MUTE_PIN, !CONFIG_LVP_MP3_PLAYER_MUTE_PIN_LEVEL_STATUS);
 }
 
 static int lvp_audio_play(void)

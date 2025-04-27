@@ -1,0 +1,17 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2019 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: LM Kconfig
+#---------------------------------------------------------------------------------#
+if LVP_LM_MEZIC_JOMOO_DRYING_RACK
+    choice
+        prompt "Language Models select:"
+        default LVP_LM_MEZIC_JOMOO_DRYING_RACK_V0DOT0DOT1_2021_0423
+        source "lvp/vui/kws/lm_models/enable_lm/mezic_jomoo_drying_rack/*/lm_version.name"
+    endchoice
+
+    # lm param kconfig
+    source "lvp/vui/kws/lm_models/enable_lm/mezic_jomoo_drying_rack/*/Kconfig"
+endif
+

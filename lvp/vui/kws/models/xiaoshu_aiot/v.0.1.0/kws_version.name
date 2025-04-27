@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2025 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Model Name
+#---------------------------------------------------------------------------------#
+
+config LVP_KWS_XIAOSHU_AIOT_VDOT0DOT1DOT0_2025_0427
+    bool "LVP_KWS_XIAOSHU_AIOT_VDOT0DOT1DOT0_2025_0427"
+
+#---------------------------------------------------------------------------------#

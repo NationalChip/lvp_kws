@@ -1,0 +1,11 @@
+# Grus
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: One KeyWord Name For ../Kconfig
+#---------------------------------------------------------------------------------#
+
+config LVP_LM_GENERAL_HELMET
+    bool "General_Helmet"
+
+#---------------------------------------------------------------------------------#

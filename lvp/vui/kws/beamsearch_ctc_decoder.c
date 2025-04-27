@@ -191,6 +191,16 @@ void LvpInitCtcKws(void)
 void LvpPrintCtcKwsList(void)
 {
 #ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
+
+    printf(LOG_TAG"Kws Version: [%s]\n", LvpCTCModelGetKwsVersion());
+# if defined CONFIG_USE_CTC_VERSION_V0DOT0DOT1
+    printf(LOG_TAG"Ctc Version: v0.1.1\n");
+# elif defined CONFIG_USE_CTC_VERSION_V0DOT0DOT3
+    printf(LOG_TAG"Ctc Version: v0.1.3\n");
+# else
+    printf(LOG_TAG"Ctc Version: error!!!\n");
+# endif
+
     g_kws_list.count = sizeof(g_kws_param_list) / sizeof(LVP_KWS_PARAM);
     g_kws_list.kws_param_list = g_kws_param_list;
     printf (LOG_TAG"Demo Kws List [Total:%d]:\n", g_kws_list.count);
@@ -318,7 +328,7 @@ DRAM0_STAGE2_SRAM_ATTR static int _LvpDoGroupScore(LVP_CONTEXT *context, int ind
         }
 
         // 先保证top激活
-        if ( (((kws_decoder_level & KWS_LEVEL_TOP_MASK) == 0)) 
+        if ( (((kws_decoder_level & KWS_LEVEL_TOP_MASK) == 0))
             && (KWS_LEVEL_END == (kws_level_type & KWS_LEVEL_END))
             && (major == 0) ) {
             if (kws_decoder_level != 0) printf(LOG_TAG"kws_decoder_level: %x, kws_level_type: %x\n", kws_decoder_level, kws_level_type);
@@ -449,7 +459,7 @@ DRAM0_STAGE2_SRAM_ATTR static int _LvpDoGroupScore(LVP_CONTEXT *context, int ind
             }
 # endif
 
-# ifdef CONFIG_LVP_ENABLE_BIONIC
+# ifdef CONFIG_LVP_ENABLE_CTC_BIONIC
             KwsStrategyRunBionic(context, &g_kws_list.kws_param_list[i], score, threshold, &s_ctc_decoder_window[0][0]);
 # endif
 
@@ -621,6 +631,11 @@ DRAM0_STAGE2_SRAM_ATTR int LvpDoKwsScore(LVP_CONTEXT *context)
     context->kws = 0;// 挪到此处的原因是这段代码执行时间比较久,主要是 softmax
     gx_dcache_invalid_range((unsigned int *)context->snpu_buffer, context->ctx_header->snpu_buffer_size);
     float *rnn_out = (float *)LvpCTCModelGetSnpuOutBuffer(context->snpu_buffer);
+
+# ifdef CONFIG_LVP_ADVANCE_HUMAN_VAD_ENABLE
+    HumanVadDectectRun(context, rnn_out);
+    return 0;
+# endif
 
 # ifdef CONFIG_ENABLE_CTC_SOFTMAX_CYCLE_STATISTIC
     int start_softmax_ms = gx_get_time_ms();

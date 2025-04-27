@@ -7,6 +7,13 @@
 #
 #=================================================================================#
 INCLUDE_DIR += lvp/common/snpu_engine/
+ifeq ($(CONFIG_LVP_ENABLE_CNN_DENOISE), y)
+common_objs += lvp/common/snpu_engine/lvp_nn_denoise.o
+endif
+
+ifeq ($(CONFIG_LVP_ENABLE_RNN_DENOISE), y)
+common_objs += lvp/common/snpu_engine/lvp_rnn_denoise.o
+endif
 
 ifeq ($(CONFIG_LVP_ENABLE_RNN_SED), y)
 common_objs += lvp/common/snpu_engine/lvp_rnn_sed.o

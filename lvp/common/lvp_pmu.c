@@ -1,5 +1,5 @@
 /* LVP
- * Copyright (C) 2001-2020 NationalChip Co., Ltd
+ * Copyright (C) 2001-2024 NationalChip Co., Ltd
  * ALL RIGHTS RESERVED!
  *
  * lvp_pmu.c:

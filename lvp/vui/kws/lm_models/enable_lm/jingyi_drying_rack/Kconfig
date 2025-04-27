@@ -1,0 +1,17 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2022 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: LM Kconfig
+#---------------------------------------------------------------------------------#
+if LVP_LM_JINGYI_DRYING_RACK
+    choice
+        prompt "Language Models select:"
+        default LVP_LM_JINGYI_DRYING_RACK_V0DOT3DOT0_2022_0902
+        source "lvp/vui/kws/lm_models/enable_lm/jingyi_drying_rack/*/lm_version.name"
+    endchoice
+
+    # lm param kconfig
+    source "lvp/vui/kws/lm_models/enable_lm/jingyi_drying_rack/*/Kconfig"
+endif
+

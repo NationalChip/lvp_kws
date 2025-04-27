@@ -1,0 +1,16 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: LM Kconfig
+#---------------------------------------------------------------------------------#
+if LVP_LM_RUIKE_BATHROOM_HEATER
+    choice
+        prompt "Language Models select:"
+        default LVP_LM_RUIKE_BATHROOM_HEATER_V0DOT0DOT1_2021_1231
+        source "lvp/vui/kws/lm_models/enable_lm/ruike_bathroom_heater/*/lm_version.name"
+    endchoice
+
+    # lm param kconfig
+    source "lvp/vui/kws/lm_models/enable_lm/ruike_bathroom_heater/*/Kconfig"
+endif

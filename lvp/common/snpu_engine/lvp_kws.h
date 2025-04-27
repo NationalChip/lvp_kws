@@ -25,5 +25,8 @@ int LvpKwsSwitchModelByEnvNoise(LVP_CONTEXT *context);
 #ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
 int LvpKwsSwitchModelByKwsState(VUI_KWS_STATE state);
 #endif
+#ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+int LvpBunKwsRun(LVP_CONTEXT *context);
+#endif
 
 #endif /* __LVP_KWS_H__ */

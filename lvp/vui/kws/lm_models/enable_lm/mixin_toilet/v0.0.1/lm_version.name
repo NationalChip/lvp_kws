@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2022 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Model Name
+#---------------------------------------------------------------------------------#
+
+config LVP_LM_MIXIN_TOILET_V0DOT0DOT1_2022_0125
+    bool "LVP_LM_MIXIN_TOILET_V0DOT0DOT1_2022_0125"
+
+#---------------------------------------------------------------------------------#

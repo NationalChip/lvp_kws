@@ -9,7 +9,8 @@
 
 ifeq ($(CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION), y)
 -include lvp/vui/kws/Makefile
-#vui_objs += $(kws_objs)
+vui_objs += $(kws_objs)
+vui_objs += $(gxdecoder_objs)
 endif
 
 ifeq ($(CONFIG_LVP_ENABLE_VOICE_PRINT_RECOGNITION), y)

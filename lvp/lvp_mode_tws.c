@@ -48,6 +48,7 @@
 #include "lvp_mode_tws.h"
 #include "lvp_mode.h"
 #include "lvp_kws.h"
+#include "lvp_vpr.h"
 
 #define LOG_TAG "[LVP_TWS]"
 
@@ -220,6 +221,8 @@ static int _TwsModeInit(LVP_MODE_TYPE mode)
     LvpQueueInit(&s_kws_task_queue, s_kws_task_queue_buffer, KWS_TASK_QUEUE_BUFFER_SIZE * sizeof(MODULE_INFO), sizeof(MODULE_INFO));
 #if (defined CONFIG_LVP_ENABLE_CTC_DECODER) || (defined CONFIG_LVP_ENABLE_CTC_GX_DECODER) || (defined CONFIG_LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER || (defined CONFIG_LVP_ENABLE_BEAMSEARCH_DECODER))
     LvpInitCtcKws();
+#elif defined CONFIG_LVP_ENABLE_MAX_DECODER
+    LvpInitMaxKws();
 #endif
 
     GX_WAKEUP_SOURCE start_mode = gx_pmu_get_wakeup_source();
@@ -245,7 +248,7 @@ static int _TwsModeInit(LVP_MODE_TYPE mode)
 
 DRAM0_STAGE2_SRAM_ATTR static void _TwsModeTick(void)
 {
- MODULE_INFO module_info = {0};
+    MODULE_INFO module_info = {0};
     if (LvpQueueGet(&s_kws_task_queue, (unsigned char *)&module_info)) {
         if (module_info.module_id == 0x100) {
 #if(defined CONFIG_LVP_HAS_VOICE_PLAYER) || (defined CONFIG_LVP_HAS_MP3_PLAYER)
@@ -281,6 +284,7 @@ DRAM0_STAGE2_SRAM_ATTR static void _TwsModeTick(void)
 # ifdef CONFIG_LVP_ENABLE_MAX_DECODER
             LvpDoMaxDecoder((LVP_CONTEXT *)module_info.priv);
 # endif
+
 #endif
 
 #ifdef CONFIG_LVP_ENABLE_VOICE_PRINT_RECOGNITION
@@ -314,6 +318,16 @@ DRAM0_STAGE2_SRAM_ATTR static void _TwsModeTick(void)
         }
 
         if (((LVP_CONTEXT *)module_info.priv)->kws) {
+#ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+            LvpAudioInSuspend();
+            LvpDynamiciallyAdjustCpuFrequency(CPU_FREQUENCE_50M);
+            while (gx_snpu_get_state() == GX_SNPU_BUSY);
+            LvpSwitchKwsModel(MODEL_TYPE_BUN_KWS);
+            ((LVP_CONTEXT *)module_info.priv)->kws = LvpBunKwsRun(((LVP_CONTEXT *)module_info.priv));
+            LvpSwitchKwsModel(MODEL_TYPE_CTC_KWS);
+            LvpDynamiciallyAdjustCpuFrequency(CPU_FREQUENCE_DEFAULT);
+            LvpAudioInResume();
+#endif
             APP_EVENT plc_event = {
                 .event_id = ((LVP_CONTEXT *)module_info.priv)->kws,
                 .ctx_index = ((LVP_CONTEXT *)module_info.priv)->ctx_index

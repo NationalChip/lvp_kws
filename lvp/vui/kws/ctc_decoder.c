@@ -90,9 +90,19 @@ void LvpInitCtcKws(void)
 void LvpPrintCtcKwsList(void)
 {
 #ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
+
+    printf(LOG_TAG"Kws Version: [%s]\n", LvpCTCModelGetKwsVersion());
+# if defined CONFIG_USE_CTC_VERSION_V0DOT0DOT1
+    printf(LOG_TAG"Ctc Version: v0.1.1\n");
+# elif defined CONFIG_USE_CTC_VERSION_V0DOT0DOT3
+    printf(LOG_TAG"Ctc Version: v0.1.3\n");
+# else
+    printf(LOG_TAG"Ctc Version: error!!!\n");
+# endif
+
     g_kws_list.count = sizeof(g_kws_param_list) / sizeof(LVP_KWS_PARAM);
     g_kws_list.kws_param_list = g_kws_param_list;
-    
+    /*
     printf (LOG_TAG"Demo Kws List [Total:%d]:\n", g_kws_list.count);
     for (int i = 0; i < g_kws_list.count; i++) {
         printf(LOG_TAG"KWS: %s | ", g_kws_list.kws_param_list[i].kws_words);
@@ -108,7 +118,7 @@ void LvpPrintCtcKwsList(void)
         }
         printf("]\n");
     }
-    
+    */
 #endif
 }
 
@@ -177,6 +187,19 @@ DRAM0_STAGE2_SRAM_ATTR int PrepareData(float *rnn_out)
 #else
     return 0;
 #endif
+}
+
+static int s_ctc_socre = 0;
+int LvpSetCtcScore(int score)
+{
+    s_ctc_socre = score;
+
+    return 0;
+}
+
+int LvpGetCtcScore(void)
+{
+    return s_ctc_socre;
 }
 
 DRAM0_STAGE2_SRAM_ATTR static int _LvpDoGroupScore(LVP_CONTEXT *context, int index, int group_number, int valid_frame_num, int major)
@@ -261,13 +284,14 @@ DRAM0_STAGE2_SRAM_ATTR static int _LvpDoGroupScore(LVP_CONTEXT *context, int ind
             }
 # endif
 
-# ifdef CONFIG_LVP_ENABLE_BIONIC
+# ifdef CONFIG_LVP_ENABLE_CTC_BIONIC
             KwsStrategyRunBionic(context, &g_kws_list.kws_param_list[i], score, threshold, &s_ctc_decoder_window[0][0]);
 # endif
 
-            if (score > (threshold + KwsStrategyGetThresholdOffset(context, threshold)) && score < 120.f) {
+            if (score > (threshold + KwsStrategyGetThresholdOffset(context, threshold)) && score <= 120.1f) {
                 if ((g_kws_list.kws_param_list[i].major&0x1) == major) {
                     context->kws = g_kws_list.kws_param_list[i].kws_value;
+                    LvpSetCtcScore((int)(10*score));
                     printf (LOG_TAG"[CTC] Activation ctx:%d,Kws:%s[%d],th:%d,S:%d,%d\n"
                             , context->ctx_index
                             , g_kws_list.kws_param_list[i].kws_words
@@ -275,7 +299,9 @@ DRAM0_STAGE2_SRAM_ATTR static int _LvpDoGroupScore(LVP_CONTEXT *context, int ind
                             , (int)(10*threshold)//g_kws_list.kws_param_list[i].threshold
                             , (int)(10*score)
                             , (int)(10*(threshold + KwsStrategyGetThresholdOffset(context, threshold))));
+#  ifndef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
                     ResetCtcWinodw();
+#  endif
                     KwsStrategyReset();
                     KwsStrategyClearThresholdOffset();
                     return 0;
@@ -323,6 +349,11 @@ DRAM0_STAGE2_SRAM_ATTR int LvpDoKwsScore(LVP_CONTEXT *context)
     context->kws = 0;// 挪到此处的原因是这段代码执行时间比较久,主要是 softmax
     gx_dcache_invalid_range((unsigned int *)context->snpu_buffer, context->ctx_header->snpu_buffer_size);
     float *rnn_out = (float *)LvpCTCModelGetSnpuOutBuffer(context->snpu_buffer);
+
+
+# ifdef CONFIG_LVP_ADVANCE_HUMAN_VAD_ENABLE
+    HumanVadDectectRun(context, rnn_out);
+# endif
 
 # ifdef CONFIG_ENABLE_CTC_SOFTMAX_CYCLE_STATISTIC
     int start_softmax_ms = gx_get_time_ms();

@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Model Name
+#---------------------------------------------------------------------------------#
+
+config LVP_KWS_EN_KWS_V0DOT1DOT3_2020_0916
+    bool "LVP_KWS_EN_KWS_V0DOT1DOT3_2020_0916[Alexa,HeySiri,OkGoogle]"
+
+#---------------------------------------------------------------------------------#

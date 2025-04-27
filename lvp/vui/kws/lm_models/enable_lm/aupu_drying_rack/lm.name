@@ -1,0 +1,11 @@
+# Grus
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: One KeyWord Name For ../Kconfig
+#---------------------------------------------------------------------------------#
+
+config LVP_LM_AUPU_DRYING_RACK
+    bool "Aupu drying rack"
+
+#---------------------------------------------------------------------------------#

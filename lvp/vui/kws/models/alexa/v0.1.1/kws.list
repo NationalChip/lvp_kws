@@ -1,0 +1,184 @@
+menu "Kws List Settings"
+    depends on LVP_KWS_EN_KWS_V0DOT1DOT1_2020_0901
+
+    config KEYWORD_ENABLE_ALEXA
+        bool "alexa"
+        default y
+        if KEYWORD_ENABLE_ALEXA
+            config KEYWORD_ALEXA_THRESHOLD
+                int "The Threshold of alexa"
+                default 960
+
+            config KEYWORD_ALEXA_VALUE
+                int "The Kws Value of alexa"
+                default 100
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_HEY_SIRI
+        bool "hey siri"
+        default n
+        if KEYWORD_ENABLE_HEY_SIRI
+            config KEYWORD_HEY_SIRI_THRESHOLD
+                int "The Threshold of hey siri"
+                default 905
+
+            config KEYWORD_HEY_SIRI_VALUE
+                int "The Kws Value of hey siri"
+                default 100
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_OK_GOOGLE
+        bool "ok google"
+        default n
+        if KEYWORD_ENABLE_OK_GOOGLE
+            config KEYWORD_OK_GOOGLE_THRESHOLD
+                int "The Threshold of ok google"
+                default 810
+
+            config KEYWORD_OK_GOOGLE_VALUE
+                int "The Kws Value of ok google"
+                default 100
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_HEY_COOLGOU
+        bool "hey coolgou"
+        default n
+        if KEYWORD_ENABLE_HEY_COOLGOU
+            config KEYWORD_HEY_COOLGOU_THRESHOLD
+                int "The Threshold of hey coolgou"
+                default 900
+
+            config KEYWORD_HEY_COOLGOU_VALUE
+                int "The Kws Value of hey coolgou"
+                default 100
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_ANSWER_THE_PHONE
+        bool "answer the phone"
+        default n
+        if KEYWORD_ENABLE_ANSWER_THE_PHONE
+            config KEYWORD_ANSWER_THE_PHONE_THRESHOLD
+                int "The Threshold of answer the phone"
+                default 805
+
+            config KEYWORD_ANSWER_THE_PHONE_VALUE
+                int "The Kws Value of answer the phone"
+                default 114
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_PLAY_MUSIC
+        bool "play music"
+        default n
+        if KEYWORD_ENABLE_PLAY_MUSIC
+            config KEYWORD_PLAY_MUSIC_THRESHOLD
+                int "The Threshold of play music"
+                default 785
+
+            config KEYWORD_PLAY_MUSIC_VALUE
+                int "The Kws Value of play music"
+                default 104
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_PLAY_NEXT_SONG
+        bool "play next song"
+        default n
+        if KEYWORD_ENABLE_PLAY_NEXT_SONG
+            config KEYWORD_PLAY_NEXT_SONG_THRESHOLD
+                int "The Threshold of play next song"
+                default 795
+
+            config KEYWORD_PLAY_NEXT_SONG_VALUE
+                int "The Kws Value of play next song"
+                default 113
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_PLAY_PREV_SONG
+        bool "play previous song"
+        default n
+        if KEYWORD_ENABLE_PLAY_PREV_SONG
+            config KEYWORD_PLAY_PREV_SONG_THRESHOLD
+                int "The Threshold of play previous song"
+                default 650
+
+            config KEYWORD_PLAY_PREV_SONG_VALUE
+                int "The Kws Value of play previous song"
+                default 112
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_REJECT_CALL
+        bool "reject the call"
+        default n
+        if KEYWORD_ENABLE_REJECT_CALL
+            config KEYWORD_REJECT_CALL_THRESHOLD
+                int "The Threshold of reject the call"
+                default 775
+
+            config KEYWORD_REJECT_CALL_VALUE
+                int "The Kws Value of reject the call"
+                default 115
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_STOP_PLAY
+        bool "stop playing"
+        default n
+        if KEYWORD_ENABLE_STOP_PLAY
+            config KEYWORD_STOP_PLAY_THRESHOLD
+                int "The Threshold of stop playing"
+                default 830
+
+            config KEYWORD_STOP_PLAY_VALUE
+                int "The Kws Value of stop playing"
+                default 103
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_VOLUME_DOWN
+        bool "volume down"
+        default n
+        if KEYWORD_ENABLE_VOLUME_DOWN
+            config KEYWORD_VOLUME_DOWN_THRESHOLD
+                int "The Threshold of volume down"
+                default 755
+
+            config KEYWORD_VOLUME_DOWN_VALUE
+                int "The Kws Value of volume down"
+                default 106
+
+            comment ""
+        endif
+
+    config KEYWORD_ENABLE_VOLUME_UP
+        bool "volume up"
+        default n
+        if KEYWORD_ENABLE_VOLUME_UP
+            config KEYWORD_VOLUME_UP_THRESHOLD
+                int "The Threshold of volume up"
+                default 805
+
+            config KEYWORD_VOLUME_UP_VALUE
+                int "The Kws Value of volume up"
+                default 105
+
+            comment ""
+        endif
+
+endmenu

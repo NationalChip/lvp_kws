@@ -1,0 +1,9 @@
+# Grus
+# Copyright (C) 2001-2019 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: 
+#---------------------------------------------------------------------------------#
+if LVP_LM_MEZIC_JOMOO_DRYING_RACK
+    source "lvp/vui/kws/lm_models/enable_lm/mezic_jomoo_drying_rack/*/lm_version.name"
+endif

@@ -1,0 +1,16 @@
+# Grus
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: 
+#---------------------------------------------------------------------------------#
+if LVP_LM_AOKE_CURTAIN
+#    choice
+#        prompt "Model select:"
+#        default LVP_LM_KWS_COCH_FAN_LIGHTS_V0DOT1DOT0_2021_1104
+#        depends on LVP_LM_COCH_FAN_LIGHTS
+
+#        source "vpa/lvp/src/vui/kws/lm_models/enable_lm/aupu_remote/*/lm_version.name"
+    source "lvp/vui/kws/lm_models/enable_lm/aoke_curtain/*/lm_version.name"
+#    endchoice
+endif

@@ -1,0 +1,16 @@
+# Grus
+# Copyright (C) 2001-2019 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig:
+#---------------------------------------------------------------------------------#
+if LVP_LM_DEMO_ASR
+#    choice
+#        prompt "Model select:"
+#        default LVP_LM_DEMO_ASR_V0DOT0DOT1_2020_1026
+#        depends on LVP_LM_DEMO_ASR
+
+#        source "lvp/vui/kws/lm_models/enable_lm/demo_asr/*/lm_version.name"
+    source "lvp/vui/kws/lm_models/enable_lm/demo_asr/*/lm_version.name"
+#    endchoice
+endif

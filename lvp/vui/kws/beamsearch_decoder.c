@@ -128,7 +128,7 @@ DRAM0_STAGE2_SRAM_ATTR static int _LvpDoGroupScore(LVP_CONTEXT *context, int ind
             LvpXipResume();
 # endif
 
-# ifdef CONFIG_LVP_ENABLE_BIONIC
+# ifdef CONFIG_LVP_ENABLE_CTC_BIONIC
             KwsStrategyRunBionic(context, &g_kws_list.kws_param_list[i], score, threshold, &s_ctc_decoder_window[0][0]);
 # endif
 

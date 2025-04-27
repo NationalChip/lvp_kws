@@ -30,9 +30,11 @@ void KwsStrategyInit(void);
 void KwsStrategyReset(void);
 void KwsStragegyInsertKwsActivation(int kws_index, int kws_value, float kws_score, int score_index, void *priv);
 LVP_ACTIVATION_KWS *KwsStragegyRun(LVP_CONTEXT *context);
-float KwsStrategyGetBunkwsThresholdOffset(LVP_CONTEXT *context, float threshold);
+
 float KwsStrategyGetThresholdOffset(LVP_CONTEXT *context, float threshold);
+float KwsStrategyGetBunkwsThresholdOffset(LVP_CONTEXT *context, float threshold);
 void KwsStrategyClearThresholdOffset(void);
+void KwsStrategyClearBunkwsThresholdOffset(void);
 int KwsStrategyRunBionic(LVP_CONTEXT *context, LVP_KWS_PARAM *kws, float score, float threshold, float *decoder_window);
 
 float KwsStrategyFineTuneScore(LVP_CONTEXT *context, float score);

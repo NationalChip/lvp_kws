@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2022 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Model Name
+#---------------------------------------------------------------------------------#
+
+config LVP_LM_JINGYI_DRYING_RACK_V0DOT0DOT3_2022_0401
+    bool "LVP_LM_JINGYI_DRYING_RACK_V0DOT0DOT3_2022_0401"
+
+#---------------------------------------------------------------------------------#

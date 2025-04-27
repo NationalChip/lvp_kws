@@ -1,0 +1,169 @@
+menu "Kws List Settings"
+depends on LVP_KWS_ALEXA_V0DOT3DOT3_2022_1129
+
+  config KEYWORD_ENABLE_ALEXA
+      bool "alexa"
+      default y
+      if KEYWORD_ENABLE_ALEXA
+          config KEYWORD_ALEXA_THRESHOLD
+              int "The Threshold of alexa"
+              default 974
+
+          config KEYWORD_ALEXA_VALUE
+              int "The Kws Value of alexa"
+              default 100
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_HEY_SIRI
+      bool "hey siri"
+      default y
+      if KEYWORD_ENABLE_HEY_SIRI
+          config KEYWORD_HEY_SIRI_THRESHOLD
+              int "The Threshold of hey sir"
+              default 777
+
+          config KEYWORD_HEY_SIRI_VALUE
+              int "The Kws Value of hey sir"
+              default 101
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_OK_GOOGLE
+      bool "ok google"
+      default y
+      if KEYWORD_ENABLE_OK_GOOGLE
+          config KEYWORD_OK_GOOGLE_THRESHOLD
+              int "The Threshold of ok google"
+              default 801
+
+          config KEYWORD_OK_GOOGLE_VALUE
+              int "The Kws Value of ok google"
+              default 102
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_ANSWER_THE_PHONE
+      bool "answer the phone"
+      default y
+      if KEYWORD_ENABLE_ANSWER_THE_PHONE
+          config KEYWORD_ANSWER_THE_PHONE_THRESHOLD
+              int "The Threshold of answer the phone"
+              default 948
+
+          config KEYWORD_ANSWER_THE_PHONE_VALUE
+              int "The Kws Value of answer the phone"
+              default 103
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_PLAY_MUSIC
+      bool "play music"
+      default y
+      if KEYWORD_ENABLE_PLAY_MUSIC
+          config KEYWORD_PLAY_MUSIC_THRESHOLD
+              int "The Threshold of play music"
+              default 900
+
+          config KEYWORD_PLAY_MUSIC_VALUE
+              int "The Kws Value of play music"
+              default 104
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_PLAY_NEXT_SONG
+      bool "play next song"
+      default y
+      if KEYWORD_ENABLE_PLAY_NEXT_SONG
+          config KEYWORD_PLAY_NEXT_SONG_THRESHOLD
+              int "The Threshold of play next song"
+              default 907
+
+          config KEYWORD_PLAY_NEXT_SONG_VALUE
+              int "The Kws Value of play next song"
+              default 105
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_PLAY_PREVIOUS_SONG
+      bool "play previous song"
+      default y
+      if KEYWORD_ENABLE_PLAY_PREVIOUS_SONG
+          config KEYWORD_PLAY_PREVIOUS_SONG_THRESHOLD
+              int "The Threshold of play previous song"
+              default 585
+
+          config KEYWORD_PLAY_PREVIOUS_SONG_VALUE
+              int "The Kws Value of play previous song"
+              default 106
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_REJECT_THE_CALL
+      bool "reject the call"
+      default y
+      if KEYWORD_ENABLE_REJECT_THE_CALL
+          config KEYWORD_REJECT_THE_CALL_THRESHOLD
+              int "The Threshold of reject the call"
+              default 695
+
+          config KEYWORD_REJECT_THE_CALL_VALUE
+              int "The Kws Value of reject the call"
+              default 107
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_STOP_PLAYING
+      bool "stop playing"
+      default y
+      if KEYWORD_ENABLE_STOP_PLAYING
+          config KEYWORD_STOP_PLAYING_THRESHOLD
+              int "The Threshold of stop playing"
+              default 633
+
+          config KEYWORD_STOP_PLAYING_VALUE
+              int "The Kws Value of stop playing"
+              default 108
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_VOLUME_DOWN
+      bool "volume down"
+      default y
+      if KEYWORD_ENABLE_VOLUME_DOWN
+          config KEYWORD_VOLUME_DOWN_THRESHOLD
+              int "The Threshold of volume down"
+              default 968
+
+          config KEYWORD_VOLUME_DOWN_VALUE
+              int "The Kws Value of volume down"
+              default 109
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_VOLUME_UP
+      bool "volume up"
+      default y
+      if KEYWORD_ENABLE_VOLUME_UP
+          config KEYWORD_VOLUME_UP_THRESHOLD
+              int "The Threshold of volume up"
+              default 975
+
+          config KEYWORD_VOLUME_UP_VALUE
+              int "The Kws Value of volume up"
+              default 110
+
+          comment ""
+      endif
+endmenu
+

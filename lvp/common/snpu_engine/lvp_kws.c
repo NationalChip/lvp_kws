@@ -31,6 +31,7 @@
 #include <decoder.h>
 #endif
 
+#include "kws_strategy.h"
 #include "common/lvp_audio_in.h"
 #include "common/lvp_standby_ratio.h"
 #include <board_misc_config.h>
@@ -62,7 +63,97 @@ DRAM0_STAGE2_SRAM_ATTR static int _SnpuCallback(int module_id, GX_SNPU_STATE sta
 }
 #endif
 
+
+#ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+
+#define _FRAME_NUMBER_ CONFIG_KWS_MODEL_DECODER_WIN_LENGTH
+static int s_feats_offset = 0;
+static short s_bunkws_feats_window[CONFIG_KWS_MODEL_INPUT_STRIDE_LENGTH * CONFIG_KWS_MODEL_FEATURES_DIM_PER_FRAME * _FRAME_NUMBER_] = {0};
+static short s_bunkws_feats_input[CONFIG_BUN_KWS_MODEL_INPUT_WIN_LENGTH * CONFIG_KWS_MODEL_FEATURES_DIM_PER_FRAME];  // bunkws 的输入窗
+
 //-------------------------------------------------------------------------------------------------
+DRAM0_STAGE2_SRAM_ATTR int LvpBunKwsRun(LVP_CONTEXT *context)
+{
+    unsigned int feat_dim_per_frame = CONFIG_KWS_MODEL_FEATURES_DIM_PER_FRAME;
+    unsigned int ipnut_stride       = LvpGetPcmFrameNumPerContext();
+    unsigned int input_win_length;
+    int kws   = 0;
+    LVP_CONTEXT *pre_context;
+    LVP_CONTEXT *cur_context;
+    unsigned char* b_snpu_buffer[2];
+    unsigned int size;
+    short *snpu_input = s_bunkws_feats_input;
+    memset(snpu_input, 0, LvpCTCModelGetSnpuFeatsDim());
+
+    LvpGetContext(context->ctx_index - 2, &pre_context, &size);
+    LvpGetContext(context->ctx_index - 1, &cur_context, &size);
+    b_snpu_buffer[0] = pre_context->snpu_buffer;
+    b_snpu_buffer[1] = cur_context->snpu_buffer;
+
+    short *state  = LvpCTCModelGetSnpuStateBuffer(b_snpu_buffer[0]);  // 将之前记忆states清0
+    memset(state, 0, LvpCTCModelGetSnpuStateDim());
+
+    int idx = s_feats_offset;
+    int ctc_score = LvpGetCtcScore();
+
+#ifdef CONFIG_ENABLE_DATA_PREPARATION_CYCLE_STATISTIC
+    int s_start_ms = gx_get_time_ms();
+#endif
+
+    if (ctc_score < CONFIG_LVP_ENTER_MODEL2_THRESHOLD) {
+        for (int i = 0; i < _FRAME_NUMBER_; i++) {
+            idx = idx % _FRAME_NUMBER_;
+            input_win_length = CONFIG_BUN_KWS_MODEL_INPUT_WIN_LENGTH;
+
+            gx_dcache_invalid_range((uint32_t *)(s_bunkws_feats_window+idx*feat_dim_per_frame * ipnut_stride), feat_dim_per_frame * ipnut_stride * sizeof(short));
+            memmove(snpu_input, &snpu_input[ipnut_stride * feat_dim_per_frame], (input_win_length - ipnut_stride) * feat_dim_per_frame * sizeof(short));
+            memcpy(&snpu_input[(input_win_length - ipnut_stride) * feat_dim_per_frame], s_bunkws_feats_window + idx * feat_dim_per_frame * ipnut_stride, ipnut_stride * feat_dim_per_frame * sizeof(short));
+            memcpy(b_snpu_buffer[i%2], snpu_input, input_win_length * feat_dim_per_frame * sizeof(short));
+            gx_dcache_clean_range((uint32_t *)b_snpu_buffer[i%2], feat_dim_per_frame * input_win_length * sizeof(short));
+            idx++;
+
+            GX_SNPU_TASK snpu_task;
+            LvpCTCModelInitSnpuTask(&snpu_task);
+            short *input  = LvpCTCModelGetSnpuFeatsBuffer(b_snpu_buffer[i%2]);
+            short *output = LvpCTCModelGetSnpuStateBuffer(b_snpu_buffer[(i+1)%2]);
+            gx_dcache_clean_range((uint32_t *)input, LvpCTCModelGetSnpuFeatsDim() * sizeof(short));
+            snpu_task.input  = (void *)MCU_TO_DEV(input);
+            snpu_task.output = (void *)MCU_TO_DEV(output);
+
+            gx_snpu_run_task_sync(&snpu_task);
+            kws = LvpDoMaxDecoder(i%2 ? cur_context : pre_context);
+            if (kws) {
+                break;
+            }
+        }
+    } else {
+        kws = context->kws;
+        LVP_KWS_PARAM_LIST *kws_list = LvpGetKwsParamList();
+        for (int i = 0; i < kws_list->count; i++) {
+            if (context->kws == kws_list->kws_param_list[i].kws_value) {
+                printf(LOG_TAG"[LVP_MAX_DECODE]Activation ctx:%d,Kws:%s[%d],th:%d,S:%d,D:%d\n", \
+                                    context->ctx_index,
+                                    kws_list->kws_param_list[i].kws_words,
+                                    kws_list->kws_param_list[i].kws_value,
+                                    kws_list->kws_param_list[i].threshold,
+                                    ctc_score,
+                                    ctc_score - kws_list->kws_param_list[i].threshold);
+                break;
+            }
+        }
+        KwsStrategyClearThresholdOffset();
+        KwsStrategyClearBunkwsThresholdOffset();
+        ResetCtcWinodw();
+    }
+#ifdef CONFIG_ENABLE_DATA_PREPARATION_CYCLE_STATISTIC
+    int s_end_ms = gx_get_time_ms();
+    printf ("bun kws npu:%d ms\n", s_end_ms - s_start_ms);
+#endif
+    ResetMaxWindow();
+    return kws;
+}
+#endif
+
 DRAM0_STAGE2_SRAM_ATTR int LvpKwsRun(LVP_CONTEXT *context)
 {
 #ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
@@ -78,6 +169,13 @@ DRAM0_STAGE2_SRAM_ATTR int LvpKwsRun(LVP_CONTEXT *context)
     unsigned int ipnut_stride       = LvpGetPcmFrameNumPerContext();
     unsigned int input_win_length   = CONFIG_KWS_MODEL_INPUT_WIN_LENGTH;
     gx_dcache_invalid_range((uint32_t *)cur_feats, feat_dim_per_frame * ipnut_stride * sizeof(short));
+
+# ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+    int idx = s_feats_offset % _FRAME_NUMBER_;
+    memcpy(&s_bunkws_feats_window[idx * ipnut_stride * feat_dim_per_frame], cur_feats, ipnut_stride * feat_dim_per_frame * sizeof(short));
+    s_feats_offset++;
+# endif
+
     memmove(snpu_input, &snpu_input[ipnut_stride * feat_dim_per_frame], (input_win_length - ipnut_stride) * feat_dim_per_frame * sizeof(short));
     memcpy(&snpu_input[(input_win_length - ipnut_stride) * feat_dim_per_frame], cur_feats, ipnut_stride * feat_dim_per_frame * sizeof(short));
     memcpy(context->snpu_buffer, snpu_input, input_win_length * feat_dim_per_frame * sizeof(short));
@@ -387,6 +485,9 @@ int LvpKwsInit(GX_SNPU_CALLBACK callback, GX_WAKEUP_SOURCE start_mode)
 {
     if (GX_WAKEUP_SOURCE_COLD == start_mode || GX_WAKEUP_SOURCE_WDT == start_mode) {
         LvpLoadKwsNpuModle();
+#ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+        LvpSwitchKwsModel(MODEL_TYPE_CTC_KWS);
+#endif
     }
     gx_snpu_init();
 

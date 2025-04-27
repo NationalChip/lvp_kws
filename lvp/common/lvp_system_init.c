@@ -145,6 +145,9 @@ void LvpSystemInit(void)
         if (flash_id == 0x001c3812 || flash_id == 0x001c3813) {
             printf(LOG_TAG"Flash vendor:[%s]\n", "ESMT");
         }
+        if (flash_id == 0x005e3414) {
+            printf(LOG_TAG"Flash vendor:[%s]\n", "ZBIT");
+        }
         printf(LOG_TAG"Flash type:  [%s]\n",      gx_spi_flash_gettype(flash));
         printf(LOG_TAG"Flash ID:    [%#x]\n",     flash_id);
         printf(LOG_TAG"Flash size:  [%d Byte]\n", gx_spi_flash_getinfo(flash, GX_FLASH_CHIP_SIZE));
@@ -168,14 +171,14 @@ void LvpSystemInit(void)
         }
 
 #ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
-# if (defined CONFIG_LVP_ENABLE_CTC_DECODER) || (defined CONFIG_LVP_ENABLE_CTC_GX_DECODER) || (defined CONFIG_LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER)
-        printf(LOG_TAG"Kws Version: [%s]\n", LvpCTCModelGetKwsVersion());
-        printf(LOG_TAG"Ctc Version: v0.1.3\n");
+# ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
         LvpPrintCtcKwsList();
-# endif
-#ifdef CONFIG_LVP_ENABLE_MAX_DECODER
         LvpPrintMaxKwsList();
-#endif
+# elif (defined CONFIG_LVP_ENABLE_CTC_DECODER) || (defined CONFIG_LVP_ENABLE_CTC_GX_DECODER) || (defined CONFIG_LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER)
+        LvpPrintCtcKwsList();
+# elif defined CONFIG_LVP_ENABLE_MAX_DECODER
+        LvpPrintMaxKwsList();
+# endif
 #endif
 
 #ifdef CONFIG_MCU_ENABLE_STACK_MONITORING

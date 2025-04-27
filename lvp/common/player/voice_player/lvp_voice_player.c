@@ -13,6 +13,7 @@
 #include <driver/gx_timer.h>
 #include "lvp_voice_player.h"
 #include "decoder/base_decoder.h"
+#include <driver/gx_dcache.h>
 #include "types.h"
 #ifdef USE_OPUS
 #include "decoder/opus_decoder.h"
@@ -178,7 +179,7 @@ static void lvp_player_clear_frame_buffer(void)
 
 static void lvp_audio_out_exit(void)
 {
-    gx_gpio_set_level(CONFIG_LVP_VOICE_PLAYER_NUTE_PIN, GX_GPIO_LEVEL_HIGH);
+    gx_gpio_set_level(CONFIG_LVP_VOICE_PLAYER_MUTE_PIN, CONFIG_LVP_VOICE_PLAYER_MUTE_PIN_LEVEL_STATUS);
     player_info.status = PLAYER_STATUS_STOP;
     lvp_player_clear_frame_buffer();
 }
@@ -280,7 +281,7 @@ static void lvp_audio_out_init(void)
 #ifdef CONFIG_LVP_HAS_VOICE_PLAYER_SLAVE_MODE
     pcm.module_freq = 12288000;
 #else
-    pcm.module_freq = gx_clock_get_module_frequence(CLOCK_MODULE_AUDIO_PLAY);
+    pcm.module_freq = (int)((gx_clock_get_module_frequence(CLOCK_MODULE_AUDIO_PLAY) + 9)/10)*10;
 #endif
 
     lvp_play_buffer = LvpGetAudioOutBuffer();
@@ -301,13 +302,13 @@ static void lvp_audio_out_init(void)
     cb.new_frame_callback = lvp_player_callback;
     cb.frame_over_callback = NULL;
 
-    gx_gpio_set_level(CONFIG_LVP_VOICE_PLAYER_NUTE_PIN, GX_GPIO_LEVEL_HIGH);
+    gx_gpio_set_level(CONFIG_LVP_VOICE_PLAYER_MUTE_PIN, CONFIG_LVP_VOICE_PLAYER_MUTE_PIN_LEVEL_STATUS);
     gx_audio_out_config_buffer(handle, &buf);
     gx_audio_out_config_pcm(handle, &pcm);
     gx_audio_out_config_cb(handle, &cb);
     gx_audio_out_set_channel(handle, DAC_CHANNEL);
     gx_audio_out_set_db(handle, lvp_vol_to_db(player_info.volume));
-    gx_gpio_set_level(CONFIG_LVP_VOICE_PLAYER_NUTE_PIN, GX_GPIO_LEVEL_LOW);
+    gx_gpio_set_level(CONFIG_LVP_VOICE_PLAYER_MUTE_PIN, !CONFIG_LVP_VOICE_PLAYER_MUTE_PIN_LEVEL_STATUS);
     // gx_mdelay(200);
 }
 

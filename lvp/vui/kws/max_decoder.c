@@ -31,9 +31,9 @@
 
 #define LOG_TAG "[LVP_MAX_DECODE]"
 
-
+#define CONFIG_KWS_MAX_DECODER_WORDS_NUMBER 200
 #ifndef CONFIG_KWS_MAX_DECODER_WIN_LENGTH
-#define CONFIG_KWS_MAX_DECODER_WIN_LENGTH 5
+#define CONFIG_KWS_MAX_DECODER_WIN_LENGTH 10
 #endif
 #ifndef CONFIG_MODEL_ACTIVATION_NUMBERS
 #define CONFIG_MODEL_ACTIVATION_NUMBERS 1
@@ -50,6 +50,7 @@ static int s_max_score = 0;
 static int s_max_index = 0;
 static LVP_KWS_PARAM_LIST g_kws_list;
 static VUI_KWS_STATE s_state = VUI_KWS_ACTIVE_STATE;
+static uint8_t *activation_flag[CONFIG_KWS_MAX_DECODER_WORDS_NUMBER] = {0};
 
 void ResetMaxWindow(void)
 {
@@ -94,13 +95,14 @@ int LvpGetVuiKwsStates(void)
 static int _LvpDoMaxScore(LVP_CONTEXT *context, int major)
 {
 #ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
-    int activation_flag = 0;
+    memset(activation_flag, 0, g_kws_list.count * sizeof(uint8_t));
     gx_dcache_invalid_range((unsigned int *)context->snpu_buffer, context->ctx_header->snpu_buffer_size);
     float *output = (float *)LvpCTCModelGetSnpuOutBuffer(context->snpu_buffer);
     int idx = s_max_index % CONFIG_KWS_MAX_DECODER_WIN_LENGTH;
+
     s_max_index++;
     context->kws = 0;
-    for (int i = 0;i < g_kws_list.count; i++) {
+    for (int i = 0; i < g_kws_list.count; i++) {
         int score = (int)(output[i] * 1000);
 
 #ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
@@ -115,6 +117,7 @@ static int _LvpDoMaxScore(LVP_CONTEXT *context, int major)
 #else
         int threshold = g_kws_list.kws_param_list[i].threshold + KwsStrategyGetBunkwsThresholdOffset(context, g_kws_list.kws_param_list[i].threshold);
 #endif
+
         if ((threshold > 100) && (score > threshold - 100) && (score < threshold)) {
             printf (LOG_TAG"Similar ctx:%d,Kws:%s[%d],th:%d,S:%d,D:%d\n"
                 , context->ctx_index
@@ -126,16 +129,16 @@ static int _LvpDoMaxScore(LVP_CONTEXT *context, int major)
         }
 
         if ((score > threshold) && ((g_kws_list.kws_param_list[i].major & 0x1) == major)) {
-            // printf (LOG_TAG"Greater than the score threshold! th:%d,S:%d,D:%d\n", threshold, score, score - threshold);
-            if (s_max_score < score && activation_flag <= CONFIG_MODEL_ACTIVATION_NUMBERS)
+            printf (LOG_TAG"Greater than the score threshold! th:%d,S:%d,D:%d\n", threshold, score, score - threshold);
+            if (s_max_score < score && activation_flag[i] <= CONFIG_MODEL_ACTIVATION_NUMBERS)
                 s_max_score = score;
             s_max_decoder_window[idx][i] = 1;
             for (int j = 0; j < CONFIG_KWS_MAX_DECODER_WIN_LENGTH; j ++) {
-                activation_flag += s_max_decoder_window[j][i];
+                activation_flag[i] += s_max_decoder_window[j][i];
             }
-
-            if (activation_flag == CONFIG_MODEL_ACTIVATION_NUMBERS) {
-                printf (LOG_TAG"Activation ctx:%d,Kws:%s[%d],th:%d,S:%d,%d\n"
+            if (activation_flag[i] == CONFIG_MODEL_ACTIVATION_NUMBERS) {
+                KwsStragegyInsertKwsActivation(i, g_kws_list.kws_param_list[i].kws_value, s_max_score/10.f, 0, NULL);
+                printf (LOG_TAG"awaken ctx:%d,Kws:%s[%d],th:%d,S:%d,%d\n"
                     , context->ctx_index
                     , g_kws_list.kws_param_list[i].kws_words
                     , g_kws_list.kws_param_list[i].kws_value
@@ -143,14 +146,12 @@ static int _LvpDoMaxScore(LVP_CONTEXT *context, int major)
                     , s_max_score
                     , s_max_score - threshold);
                 s_max_score = 0;
-                context->kws = g_kws_list.kws_param_list[i].kws_value;
                 if (g_kws_list.kws_param_list[i].major)
                     KwsStrategyClearBunkwsThresholdOffset();
 #ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
                 ResetCtcWinodw();
                 return g_kws_list.kws_param_list[i].kws_value;
 #endif
-                return 0;
             }
         }
         else {
@@ -166,13 +167,25 @@ static int _LvpDoMaxScore(LVP_CONTEXT *context, int major)
 int LvpDoMaxDecoder(LVP_CONTEXT *context)
 {
 #ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
-    // int ret = _LvpDoMaxScore(context, 1);
-    // if (ret != 0 && s_state == VUI_KWS_ACTIVE_STATE) {
-    _LvpDoMaxScore(context, 0);
-    // }
+    int ret = _LvpDoMaxScore(context, 1);
+    if (ret != 0 && s_state == VUI_KWS_ACTIVE_STATE) {
+        _LvpDoMaxScore(context, 0);
+    }
+    // 选择分差大来做最终激活词
+    LVP_ACTIVATION_KWS *activation_kws = KwsStragegyRun(context);
+    if (NULL != activation_kws) {
+        context->kws = activation_kws->kws_value;
+        KwsStrategyClearThresholdOffset();
+        KwsStrategyReset();
+    }
 #endif
     return 0;
 }
 
-void LvpInitMaxKws(void){}
+void LvpInitMaxKws(void)
+{
+    if (CONFIG_KWS_MAX_DECODER_WORDS_NUMBER < g_kws_list.count)
+        printf(LOG_TAG "==ERROR== The activation_flag space is too small\n");
 
+    KwsStrategyInit();
+}

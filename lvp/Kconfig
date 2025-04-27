@@ -38,8 +38,12 @@ menu "LVP Workmode settings"
         depends on LVP_HAS_SED_MODE
 
     config LVP_INIT_WORKMODE_FFT_RECOVER
-        bool "NN Denoise"
+        bool "FFT Recover"
         depends on LVP_HAS_FFT_RECOVER_MODE
+
+    config LVP_INIT_WORKMODE_PITCH_SHIFT
+        bool "Pitch Shift"
+        depends on LVP_HAS_PITCH_SHIFT_MODE
 
     endchoice
 
@@ -181,9 +185,17 @@ menu "LVP Workmode settings"
             default n
 
         config NN_DENOISE_CYCLES_DEBUG
-            bool "Print the running time of each function "
+            bool "Print the running time of wav recover"
             default n
 
+        config NN_DENOISE_FFT_CYCLES_DEBUG
+            bool "Print the running time of FFT"
+            default n
+
+        config NN_DENOISE_START_SET_INIT_STATE_TIME
+            int "Sets the start time for changing the initial state(unit:context)"
+            default 8
+            depends on LVP_WALKIE_TALKIE_MODEL
     endif
 
     menuconfig LVP_HAS_FFT_RECOVER_MODE
@@ -191,6 +203,23 @@ menu "LVP Workmode settings"
         default n
         help
           If you need NN denoise workmode, say Y here!
+
+    menuconfig LVP_HAS_PITCH_SHIFT_MODE
+        bool "Has pitch shift workmode"
+        default n
+        help
+          If you need pitch shift workmode, say Y here!
+
+    if LVP_HAS_PITCH_SHIFT_MODE
+        choice
+            prompt "Select a tone mode:"
+            default PITCH_SHIFT_RISING_MODE
+            config PITCH_SHIFT_RISING_MODE
+                bool "Toning uses the rising mode"
+            config PITCH_SHIFT_DESCENDING_MODE
+                bool "Toning uses the descending mode"
+        endchoice
+    endif
 
 endmenu
 
@@ -256,6 +285,14 @@ menu "I/O Buffer Settings"
         prompt "PCM Frame Length selects:"
         default PCM_FRAME_LENGTH_10MS
 
+        config PCM_FRAME_LENGTH_1MS
+            bool "1ms"
+            depends on PCM_SAMPLE_RATE_48K
+        config PCM_FRAME_LENGTH_2MS
+            bool "2ms"
+            depends on PCM_SAMPLE_RATE_48K
+        config PCM_FRAME_LENGTH_4MS
+            bool "4ms"
         config PCM_FRAME_LENGTH_10MS
             bool "10ms"
         config PCM_FRAME_LENGTH_16MS

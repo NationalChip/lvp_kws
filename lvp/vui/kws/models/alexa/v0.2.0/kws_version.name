@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Model Name
+#---------------------------------------------------------------------------------#
+
+config LVP_KWS_ALEXA_V0DOT2DOT0_2021_0916
+    bool "LVP_KWS_ALEXA_V0DOT2DOT0_2021_0916"
+
+#---------------------------------------------------------------------------------#

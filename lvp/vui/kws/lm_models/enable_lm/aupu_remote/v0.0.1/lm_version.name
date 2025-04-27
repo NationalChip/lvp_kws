@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Model Name
+#---------------------------------------------------------------------------------#
+
+config LVP_LM_AUPU_REMOTE_V0DOT0DOT1_2021_0622
+    bool "LVP_LM_AUPU_REMOTE_V0DOT0DOT1_2021_0622"
+
+#---------------------------------------------------------------------------------#

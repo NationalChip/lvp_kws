@@ -106,7 +106,7 @@ int LvpAudioOutSetPcmParam(unsigned int sample_rate, unsigned char bits, unsigne
     pcm.bits        = bits;
     pcm.interlace   = 0;
     pcm.endian      = 0;
-    pcm.module_freq = gx_clock_get_module_frequence(CLOCK_MODULE_AUDIO_PLAY);
+    pcm.module_freq = (int)((gx_clock_get_module_frequence(CLOCK_MODULE_AUDIO_PLAY) + 9)/10)*10;
 
     gx_audio_out_config_pcm(handle, &pcm);
 

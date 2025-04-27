@@ -1,0 +1,11 @@
+# Grus
+# Copyright (C) 2001-2022 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: One KeyWord Name For ../Kconfig
+#---------------------------------------------------------------------------------#
+
+config LVP_LM_ALI_ITON_CURTAIN
+    bool "Ali Iton Curtain"
+
+#---------------------------------------------------------------------------------#

@@ -1,0 +1,15 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2025 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: One KeyWord Name For ../Kconfig
+#---------------------------------------------------------------------------------#
+
+choice
+    prompt "Model select:"
+    default LVP_KWS_XIAOSHU_AIOT_VDOT0DOT1DOT0_2025_0427
+    depends on LVP_KWS_XIAOSHU_AIOT
+
+    source "lvp/vui/kws/models/xiaoshu_aiot/*/kws_version.name"
+endchoice
+

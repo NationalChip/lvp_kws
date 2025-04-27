@@ -23,7 +23,7 @@ if KWS_TYPE_HYBRID
     config KWS_TYPE_HYBRID_SWITCH_BY_ENV_NOISE
         bool "Switch Model by Environment Noise"
         default y
-        select ENABLE_PLL_FREQUENCY_50M
+        select ENABLE_PLL_FREQUENCY_HIGH
         select ENABLE_NOISE_JUDGEMENT
 
     config KWS_TYPE_HYBRID_SWITCH_BY_KWS_STATE
@@ -58,19 +58,39 @@ config LVP_SHORT_INSTRUCTIONS_OFFSET
     depends on LVP_ENABLE_OPTIMIZE_SHORT_INSTRUCTIONS
     default 0
 
-config LVP_ENABLE_BIONIC
-    bool "Enable BIONIC To Reduce False Activation"
+
+config LVP_ENABLE_CTC_BIONIC
+    bool "Enable CTC BIONIC To Reduce False Activation"
     default n
+    depends on LVP_ENABLE_CTC_DECODER || ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE || LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER
 config LVP_KWS_THRESHOLD_STEP
-    int "Threshold Step For Bionic(x10)"
-    depends on LVP_ENABLE_BIONIC
+    int "[CTC] Threshold Step For Bionic(x10)"
+    depends on LVP_ENABLE_CTC_BIONIC
     default 5
 config LVP_KWS_MAX_THRESHOLD_ADJUSTMENT_VALUE
-    int "Maximum Threshold Adjustment Value For Bionic(x10)"
-    depends on LVP_ENABLE_BIONIC
+    int "[CTC] Maximum Threshold Adjustment Value For Bionic(x10)"
+    depends on LVP_ENABLE_CTC_BIONIC
     default 20
 config LVP_KWS_THRESHOLD_ADJUST_TIME
-    int "Threshold Adjust time For Bionic(Second)"
-    depends on LVP_ENABLE_BIONIC
+    int "[CTC] Threshold Adjust time For Bionic(Second)"
+    depends on LVP_ENABLE_CTC_BIONIC
     default 500
+
+config LVP_ENABLE_BUNKWS_BIONIC
+    bool "Enable Bunkws BIONIC To Reduce False Activation"
+    default n
+    depends on LVP_ENABLE_MAX_DECODER || ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+config LVP_BUNKWS_KWS_THRESHOLD_STEP
+    int "[BUNKWS] Threshold Step For Bionic(x100)"
+    depends on LVP_ENABLE_BUNKWS_BIONIC
+    default 5
+config LVP_BUNKWS_MAX_THRESHOLD_ADJUSTMENT_VALUE
+    int "[BUNKWS] Maximum Threshold Adjustment Value For Bionic(x100)"
+    depends on LVP_ENABLE_BUNKWS_BIONIC
+    default 40
+config LVP_BUNKWS_THRESHOLD_ADJUST_TIME
+    int "[BUNKWS] Threshold Adjust time For Bionic(Second)"
+    depends on LVP_ENABLE_BUNKWS_BIONIC
+    default 1000
+
 #---------------------------------------------------------------------------------#

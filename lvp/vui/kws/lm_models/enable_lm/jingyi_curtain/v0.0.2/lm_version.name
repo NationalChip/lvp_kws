@@ -1,0 +1,11 @@
+# Voice Signal Preprocess
+# Copyright (C) 2001-2021 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# Kconfig: Model Name
+#---------------------------------------------------------------------------------#
+
+config LVP_LM_JINGYI_CURTAIN_V0DOT0DOT2_2022_0331
+    bool "LVP_LM_JINGYI_CURTAIN_V0DOT0DOT2_2022_0331"
+
+#---------------------------------------------------------------------------------#

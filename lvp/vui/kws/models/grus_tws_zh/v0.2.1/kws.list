@@ -1,0 +1,304 @@
+menu "Kws List Settings"
+depends on LVP_KWS_GRUS_TWS_ZH_V0DOT2DOT1_2021_0720
+
+  config KEYWORD_ENABLE_XIAO_AI_FANG_YAN
+      bool "xiao ai fang yan"
+      default y
+      if KEYWORD_ENABLE_XIAO_AI_FANG_YAN
+          config KEYWORD_XIAO_AI_FANG_YAN_THRESHOLD
+              int "The Threshold of xiao ai fang yan"
+              default 956
+
+          config KEYWORD_XIAO_AI_FANG_YAN_VALUE
+              int "The Kws Value of xiao ai fang yan"
+              default 100
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_XIAO_AI_TONG_XUE
+      bool "xiao ai tong xue"
+      default y
+      if KEYWORD_ENABLE_XIAO_AI_TONG_XUE
+          config KEYWORD_XIAO_AI_TONG_XUE_THRESHOLD
+              int "The Threshold of xiao ai tong xue"
+              default 956
+
+          config KEYWORD_XIAO_AI_TONG_XUE_VALUE
+              int "The Kws Value of xiao ai tong xue"
+              default 101
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_XIAO_DU_XIAO_DU
+      bool "xiao du xiao du"
+      default y
+      if KEYWORD_ENABLE_XIAO_DU_XIAO_DU
+          config KEYWORD_XIAO_DU_XIAO_DU_THRESHOLD
+              int "The Threshold of xiao du xiao du"
+              default 872
+
+          config KEYWORD_XIAO_DU_XIAO_DU_VALUE
+              int "The Kws Value of xiao du xiao du"
+              default 102
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_TIAN_MAO_JING_LING
+      bool "tian mao jing ling"
+      default y
+      if KEYWORD_ENABLE_TIAN_MAO_JING_LING
+          config KEYWORD_TIAN_MAO_JING_LING_THRESHOLD
+              int "The Threshold of tian mao jing ling"
+              default 923
+
+          config KEYWORD_TIAN_MAO_JING_LING_VALUE
+              int "The Kws Value of tian mao jing ling"
+              default 103
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_JIE_TING_DIAN_HUA
+      bool "jie ting dian hua"
+      default y
+      if KEYWORD_ENABLE_JIE_TING_DIAN_HUA
+          config KEYWORD_JIE_TING_DIAN_HUA_THRESHOLD
+              int "The Threshold of jie ting dian hua"
+              default 882
+
+          config KEYWORD_JIE_TING_DIAN_HUA_VALUE
+              int "The Kws Value of jie ting dian hua"
+              default 104
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_GUA_DUAN_DIAN_HUA
+      bool "gua duan dian hua"
+      default y
+      if KEYWORD_ENABLE_GUA_DUAN_DIAN_HUA
+          config KEYWORD_GUA_DUAN_DIAN_HUA_THRESHOLD
+              int "The Threshold of gua duan dian hua"
+              default 861
+
+          config KEYWORD_GUA_DUAN_DIAN_HUA_VALUE
+              int "The Kws Value of gua duan dian hua"
+              default 105
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_BO_FANG_YIN_YUE
+      bool "bo fang yin yue"
+      default y
+      if KEYWORD_ENABLE_BO_FANG_YIN_YUE
+          config KEYWORD_BO_FANG_YIN_YUE_THRESHOLD
+              int "The Threshold of bo fang yin yue"
+              default 897
+
+          config KEYWORD_BO_FANG_YIN_YUE_VALUE
+              int "The Kws Value of bo fang yin yue"
+              default 106
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_JI_XU_BO_FANG
+      bool "ji xu bo fang"
+      default y
+      if KEYWORD_ENABLE_JI_XU_BO_FANG
+          config KEYWORD_JI_XU_BO_FANG_THRESHOLD
+              int "The Threshold of ji xu bo fang"
+              default 881
+
+          config KEYWORD_JI_XU_BO_FANG_VALUE
+              int "The Kws Value of ji xu bo fang"
+              default 107
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_ZAN_TING_YIN_YUE
+      bool "zan ting yin yue"
+      default y
+      if KEYWORD_ENABLE_ZAN_TING_YIN_YUE
+          config KEYWORD_ZAN_TING_YIN_YUE_THRESHOLD
+              int "The Threshold of zan ting yin yue"
+              default 899
+
+          config KEYWORD_ZAN_TING_YIN_YUE_VALUE
+              int "The Kws Value of zan ting yin yue"
+              default 108
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_TING_ZHI_BO_FANG
+      bool "ting zhi bo fang"
+      default y
+      if KEYWORD_ENABLE_TING_ZHI_BO_FANG
+          config KEYWORD_TING_ZHI_BO_FANG_THRESHOLD
+              int "The Threshold of ting zhi bo fang"
+              default 867
+
+          config KEYWORD_TING_ZHI_BO_FANG_VALUE
+              int "The Kws Value of ting zhi bo fang"
+              default 109
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_TING_ZHI_YIN_YUE
+      bool "ting zhi yin yue"
+      default y
+      if KEYWORD_ENABLE_TING_ZHI_YIN_YUE
+          config KEYWORD_TING_ZHI_YIN_YUE_THRESHOLD
+              int "The Threshold of ting zhi yin yue"
+              default 896
+
+          config KEYWORD_TING_ZHI_YIN_YUE_VALUE
+              int "The Kws Value of ting zhi yin yue"
+              default 109
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_ZAN_TING_BO_FANG
+      bool "zan ting bo fang"
+      default y
+      if KEYWORD_ENABLE_ZAN_TING_BO_FANG
+          config KEYWORD_ZAN_TING_BO_FANG_THRESHOLD
+              int "The Threshold of zan ting bo fang"
+              default 884
+
+          config KEYWORD_ZAN_TING_BO_FANG_VALUE
+              int "The Kws Value of zan ting bo fang"
+              default 110
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_ZENG_DA_YIN_LIANG
+      bool "zeng da yin liang"
+      default y
+      if KEYWORD_ENABLE_ZENG_DA_YIN_LIANG
+          config KEYWORD_ZENG_DA_YIN_LIANG_THRESHOLD
+              int "The Threshold of zeng da yin liang"
+              default 876
+
+          config KEYWORD_ZENG_DA_YIN_LIANG_VALUE
+              int "The Kws Value of zeng da yin liang"
+              default 111
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_JIAN_XIAO_YIN_LIANG
+      bool "jian xiao yin liang"
+      default y
+      if KEYWORD_ENABLE_JIAN_XIAO_YIN_LIANG
+          config KEYWORD_JIAN_XIAO_YIN_LIANG_THRESHOLD
+              int "The Threshold of jian xiao yin liang"
+              default 918
+
+          config KEYWORD_JIAN_XIAO_YIN_LIANG_VALUE
+              int "The Kws Value of jian xiao yin liang"
+              default 112
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_JIA_DA_YIN_LIANG
+      bool "jia da yin liang"
+      default y
+      if KEYWORD_ENABLE_JIA_DA_YIN_LIANG
+          config KEYWORD_JIA_DA_YIN_LIANG_THRESHOLD
+              int "The Threshold of jia da yin liang"
+              default 896
+
+          config KEYWORD_JIA_DA_YIN_LIANG_VALUE
+              int "The Kws Value of jia da yin liang"
+              default 113
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_JIANG_DI_YIN_LIANG
+      bool "jiang di yin liang"
+      default y
+      if KEYWORD_ENABLE_JIANG_DI_YIN_LIANG
+          config KEYWORD_JIANG_DI_YIN_LIANG_THRESHOLD
+              int "The Threshold of jiang di yin liang"
+              default 878
+
+          config KEYWORD_JIANG_DI_YIN_LIANG_VALUE
+              int "The Kws Value of jiang di yin liang"
+              default 114
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_SHANG_YI_SHOU
+      bool "shang yi shou"
+      default y
+      if KEYWORD_ENABLE_SHANG_YI_SHOU
+          config KEYWORD_SHANG_YI_SHOU_THRESHOLD
+              int "The Threshold of shang yi shou"
+              default 921
+
+          config KEYWORD_SHANG_YI_SHOU_VALUE
+              int "The Kws Value of shang yi shou"
+              default 115
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_XIA_YI_SHOU
+      bool "xia yi shou"
+      default y
+      if KEYWORD_ENABLE_XIA_YI_SHOU
+          config KEYWORD_XIA_YI_SHOU_THRESHOLD
+              int "The Threshold of xia yi shou"
+              default 924
+
+          config KEYWORD_XIA_YI_SHOU_VALUE
+              int "The Kws Value of xia yi shou"
+              default 116
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_SHANG_YI_QU
+      bool "shang yi qu"
+      default y
+      if KEYWORD_ENABLE_SHANG_YI_QU
+          config KEYWORD_SHANG_YI_QU_THRESHOLD
+              int "The Threshold of shang yi qu"
+              default 914
+
+          config KEYWORD_SHANG_YI_QU_VALUE
+              int "The Kws Value of shang yi qu"
+              default 117
+
+          comment ""
+      endif
+
+  config KEYWORD_ENABLE_XIA_YI_QU
+      bool "xia yi qu"
+      default y
+      if KEYWORD_ENABLE_XIA_YI_QU
+          config KEYWORD_XIA_YI_QU_THRESHOLD
+              int "The Threshold of xia yi qu"
+              default 950
+
+          config KEYWORD_XIA_YI_QU_VALUE
+              int "The Kws Value of xia yi qu"
+              default 118
+
+          comment ""
+      endif
+endmenu
+

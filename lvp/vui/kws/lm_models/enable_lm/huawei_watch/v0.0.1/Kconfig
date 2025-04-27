@@ -1,0 +1,23 @@
+
+if LVP_LM_HUAWEI_WATCH_V0DOT0DOT1_2020_1110
+    config KWS_MODEL_BEAMSEARCH_AND_LM_ALPHA
+        default 9
+
+    config KWS_MODEL_BEAMSEARCH_AND_LM_BETA
+        default 11
+
+    config KWS_MODEL_BEAMSEARCH_AND_LM_CUTOFF_TOP_N
+        default 30
+
+    config BEAM_SIZE
+        default 3
+
+    config PREFIX_CHAR_LENGTH
+        default 8
+
+    config LEVENSHTEIN_THRESHOLD
+        default 800
+
+    config DIMSIM_THRESHOLD
+        default 100
+endif
