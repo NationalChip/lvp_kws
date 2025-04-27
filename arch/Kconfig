@@ -1,5 +1,5 @@
 # Voice Signal Preprocess
-# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# Copyright (C) 2001-2024 NationalChip Co., Ltd
 # ALL RIGHTS RESERVED!
 #
 # Kconfig: Chipset setting
@@ -7,7 +7,7 @@
 
 config MCU_ARCH
     string
-    default "csky" if (GX8002)
+    default "csky" if (GX8002||GX8003)
     help
       This option should contain the architecture name to build the
       appropriate arch/cpu/<CONFIG_MCU_ARCH> directory.
@@ -15,7 +15,7 @@ config MCU_ARCH
 
 config MCU_TYPE
     string
-    default "ck804" if (GX8002)
+    default "ck804" if (GX8002||GX8003)
     help
       This option should contain the CPU name to build the correct
       arch/cpu/<CONFIG_MCU_TYPE> directory.
@@ -30,7 +30,7 @@ config MCU_LINK_SCRIPT
 
 config SOC_MODEL
     string
-    default "grus" if GX8002
+    default "grus" if GX8002||GX8003
     help
       This option should contain the SoC name to build the directory
       arch/soc/<CONFIG_SOC_MODEL>.

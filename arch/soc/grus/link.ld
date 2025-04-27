@@ -22,30 +22,30 @@
 #define STAGE2_XIP_TEXT   *(.xip.text)
 #define STAGE2_XIP_RODATA *(.xip.rodata*)
 
-# define RUN_AT_STAGE2_TEXT (tmp_objs/vic.o \
+# define RUN_AT_STAGE2_TEXT (drivers/intc/vic.o \
                             CONFIG_BOARD_PATH/clock_board.o \
-                            tmp_objs/flash_spi.o \
-                            tmp_objs/spi_nor_ids.o \
-                            tmp_objs/flash.o  \
-                            tmp_objs/pmu_ctrl.o \
-                            tmp_objs/pmu_osc.o \
-                            tmp_objs/ldo.o \
-                            tmp_objs/clock.o \
+                            drivers/mtd/spinor/flash_spi.o \
+                            drivers/mtd/spinor/spi_nor_ids.o \
+                            drivers/mtd/flash.o  \
+                            drivers/pmu/pmu_ctrl.o \
+                            drivers/pmu/pmu_osc.o \
+                            drivers/analog/ldo.o \
+                            drivers/clock/v2.0/clock.o \
                             arch/cpu/csky/ck804/start.o \
                             arch/cpu/csky/ck804/spl_start.o \
                             arch/soc/grus/system.o \
                             arch/soc/grus/trap_c.o \
                             arch/soc/grus/vectors.o \
-                            tmp_objs/systick_counter.o \
-                            tmp_objs/gx_counter.o \
-                            tmp_objs/gx_dcache.o \
+                            drivers/counter/systick_counter.o \
+                            drivers/counter/gx_counter.o \
+                            drivers/cache/gx_dcache.o \
                             utility/libc/csky/memcpy.o \
                             utility/libc/csky/memcpy_fast.o \
                             utility/libc/csky/memset.o \
                             utility/libc/csky/memset_fast.o \
                             utility/libm/csky/ef_exp.o \
                             utility/libm/csky/wf_exp.o \
-                            tmp_objs/gx_icache.o)
+                            drivers/cache/gx_icache.o)
 
 /* LMA */
 #ifdef CONFIG_MCU_ENABLE_JTAG_DEBUG
@@ -62,7 +62,7 @@
     LD_NC_NPU_IMAGE_OFFSET  =    0;
     LD_VP_NPU_IMAGE_OFFSET  =    0;
     LD_MCU_END_IMAGE_OFFSET =    0;
-#else
+#else /*CONFIG_MCU_ENABLE_JTAG_DEBUG*/
 # define STAGE1_SRAM_TEXT_LMA   AT(0)
 # define STAGE1_SRAM_DATA_LMA   AT(SIZEOF(.stage1_sram_text))
 
@@ -77,6 +77,11 @@
 #  define VP_NPU_LMA            AT(LENGTH(stage1_dram)+STAGE2_HEAD_LENGTH-HEAD_LENGTH+SIZEOF(.stage2_xip_text)+SIZEOF(.stage2_sram_text)+SIZEOF(.stage2_sram_data) \
                                     +SIZEOF(.npu_section)+SIZEOF(.nc_npu_section))
 #  define EXTERNAL_FLASH_LMA    AT(0x80000 -HEAD_LENGTH)
+
+/*double kws:bunkws run in sram*/
+#  ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+        LD_NPU_IMAGE_OFFSET    =    LENGTH(stage1_dram)+STAGE2_HEAD_LENGTH+SIZEOF(.stage2_xip_text)+SIZEOF(.stage2_sram_text)+SIZEOF(.stage2_sram_data);
+#  endif
 
 #  ifndef CONFIG_NPU_RUN_IN_FLASH
         LD_NPU_IMAGE_OFFSET    =    LENGTH(stage1_dram)+STAGE2_HEAD_LENGTH+SIZEOF(.stage2_xip_text)+SIZEOF(.stage2_sram_text)+SIZEOF(.stage2_sram_data);
@@ -95,9 +100,12 @@
                                     +SIZEOF(.nc_npu_section)
 #   endif
                                     ;
-#  endif
+#  endif/*CONFIG_NPU_RUN_IN_FLASH*/
 
    LD_MCU_END_IMAGE_OFFSET     =    LENGTH(stage1_dram)+STAGE2_HEAD_LENGTH+SIZEOF(.stage2_xip_text)+SIZEOF(.stage2_sram_text)+SIZEOF(.stage2_sram_data)
+#  ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+                                    +SIZEOF(.bunkws_npu_section)
+#  endif
 #  ifndef CONFIG_NPU_RUN_IN_FLASH
 #   ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
                                     +SIZEOF(.npu_section)
@@ -111,7 +119,8 @@
 #  endif
                                     ;
 
-# else
+# else /*CONFIG_MCU_ENABLE_XIP*/
+
 #  define STAGE2_XIP_TEXT_LMA
 #  define STAGE2_SRAM_TEXT_LMA  AT(LENGTH(stage1_dram)+STAGE2_HEAD_LENGTH-HEAD_LENGTH)
 #  define STAGE2_SRAM_DATA_LMA  AT(LENGTH(stage1_dram)+STAGE2_HEAD_LENGTH-HEAD_LENGTH+SIZEOF(.stage2_sram_text))
@@ -137,7 +146,7 @@
 #   endif
 #   if (defined CONFIG_LVP_ENABLE_NN_DENOISE) || (defined CONFIG_LVP_ENABLE_SED)
                                     +SIZEOF(.nc_npu_section)
-#   endif
+#endif
                                     ;
 
     LD_MCU_END_IMAGE_OFFSET     =    LENGTH(stage1_dram)+STAGE2_HEAD_LENGTH+SIZEOF(.stage2_sram_text)+SIZEOF(.stage2_sram_data)
@@ -236,17 +245,17 @@ SECTIONS
         *(EXCLUDE_FILE RUN_AT_STAGE2_TEXT .text*)
         *(EXCLUDE_FILE RUN_AT_STAGE2_TEXT .rodata*)
 #  ifdef CONFIG_SYSTICK_COUNTER
-        tmp_objs/gx_counter.o(.rodata*)
+        drivers/counter/systick_counter.o(.rodata*)
 #  elif defined CONFIG_GX_COUNTER
-        tmp_objs/gx_counter.o(.rodata*)
+        drivers/counter/gx_counter.o(.rodata*)
 #  endif
-        tmp_objs/gx_icache.o(.rodata*)
-        tmp_objs/gx_dcache.o(.rodata*)
-        tmp_objs/vic.o(.rodata*)
-        tmp_objs/flash.o(.rodata*)
-        tmp_objs/flash_spi.o(.rodata*)
-        tmp_objs/spi_nor_ids.o(.rodata*)
-        tmp_objs/ldo.o(.rodata*)
+        drivers/cache/gx_icache.o(.rodata*)
+        drivers/cache/gx_dcache.o(.rodata*)
+        drivers/intc/vic.o(.rodata*)
+        drivers/mtd/flash.o(.rodata*)
+        drivers/mtd/spinor/flash_spi.o(.rodata*)
+        drivers/mtd/spinor/spi_nor_ids.o(.rodata*)
+        drivers/analog/ldo.o(.rodata*)
 # endif
 
 # ifdef CONFIG_KWS_TYPE_HYBRID
@@ -259,6 +268,12 @@ SECTIONS
 # endif
 
 # ifdef CONFIG_NPU_RUN_IN_FLASH
+        . = ALIGN(4);
+        KEEP(*(.xip_cmd*))
+        . = ALIGN(4);
+        KEEP(*(.xip_weight*))
+        . = ALIGN(4);
+        KEEP(*(.xip_npu_section*))
         . = ALIGN(4);
         KEEP(*(.cmd*))
         . = ALIGN(4);
@@ -290,19 +305,19 @@ SECTIONS
         arch/soc/grus/trap_c.o(.rodata*)
         arch/soc/grus/vectors.o(.text*)
         arch/soc/grus/vectors.o(.rodata*)
-        tmp_objs/flash_spi.o(.text*)
-        tmp_objs/spi_nor_ids.o(.text*)
-        tmp_objs/ldo.o(.text*)
-        tmp_objs/flash.o(.text*)
-        tmp_objs/pmu_ctrl.o(.text*)
-        tmp_objs/pmu_ctrl.o(.rodata*)
-        tmp_objs/pmu_osc.o(.text*)
-        tmp_objs/pmu_osc.o(.rodata*)
-        tmp_objs/clock.o(.text*)
-        tmp_objs/clock.o(.rodata*)
-        tmp_objs/vic.o(.text*)
-        tmp_objs/gx_dcache.o(.text*)
-        tmp_objs/gx_icache.o(.text*)
+        drivers/mtd/spinor/flash_spi.o(.text*)
+        drivers/mtd/spinor/spi_nor_ids.o(.text*)
+        drivers/analog/ldo.o(.text*)
+        drivers/mtd/flash.o(.text*)
+        drivers/pmu/pmu_ctrl.o(.text*)
+        drivers/pmu/pmu_ctrl.o(.rodata*)
+        drivers/pmu/pmu_osc.o(.text*)
+        drivers/pmu/pmu_osc.o(.rodata*)
+        drivers/clock/v2.0/clock.o(.text*)
+        drivers/clock/v2.0/clock.o(.rodata*)
+        drivers/intc/vic.o(.text*)
+        drivers/cache/gx_dcache.o(.text*)
+        drivers/cache/gx_icache.o(.text*)
         utility/libc/csky/memcpy.o(.text*)
         utility/libc/csky/memcpy_fast.o(.text*)
 # ifdef CONFIG_LVP_DISABLE_XIP_WHILE_CODE_RUN_AT_SRAM
@@ -314,9 +329,9 @@ SECTIONS
         utility/libm/csky/wf_exp.o(.rodata*)
 # endif
 # if defined CONFIG_SYSTICK_COUNTER
-        tmp_objs/gx_counter.o(.text*)
+        drivers/counter/systick_counter.o(.text*)
 # elif defined CONFIG_GX_COUNTER
-        tmp_objs/gx_counter.o(.text*)
+        drivers/counter/gx_counter.o(.text*)
 # endif
         CONFIG_BOARD_PATH/clock_board.o(.text*)
         CONFIG_BOARD_PATH/clock_board.o(.rodata*)
@@ -411,6 +426,19 @@ SECTIONS
     } > multboot_info_dram
 #endif
 
+#ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+    . = ALIGN(4);
+    .bunkws_npu_section ALIGN(4): NPU_LMA
+    {
+        _start_bunkws_npu_section_ = .;
+        KEEP(*(.bunkws_cmd*))
+        . = ALIGN(4);
+        KEEP(*(.bunkws_weight*))
+        . = ALIGN(4);
+        _end_bunkws_npu_section_ = .;
+    }
+#endif
+
 #ifndef CONFIG_NPU_RUN_IN_FLASH
 
 # ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
@@ -453,7 +481,7 @@ SECTIONS
 # endif
 #endif /* CONFIG_MCU_ENABLE_XIP */
 
-# ifdef CONFIG_DL
+#ifdef CONFIG_DL
     . = ALIGN(4);
     .external_flash_section : EXTERNAL_FLASH_LMA
     {
@@ -464,6 +492,6 @@ SECTIONS
         . = ALIGN(4);
         _end_external_flash_section_ = .;
     } > external_flash_iram
-# endif
+#endif
 
 }
