@@ -241,8 +241,7 @@ CCFLAGS        += -mcpu=ck804ef -Wpointer-arith -Wundef -Wall -Wundef \
 ASFLAGS         = -mcpu=ck804ef -Wa,--defsym=ck804=1 -EL -mhard-float
 
 # The git version of mcu
-#MCU_VERSION    := "$(shell git describe --dirty --always --tags)"
-MCU_VERSION    := ""
+MCU_VERSION    := "$(shell git describe --dirty --always --tags)"
 CCFLAGS        += -DMCU_VERSION=\"$(MCU_VERSION)\"
 ASFLAGS        += -DMCU_VERSION=\"$(MCU_VERSION)\"
 
@@ -276,8 +275,7 @@ INCLUDE_DIR    += lvp/vui/kws
 INCLUDE_DIR    += lvp
 INCLUDE_DIR    += lvp/vui/denoise
 
-LIBS           += -ldriver_release_v1.0.5
-
+LIBS           += -ldriver_release_v1.0.6
 LIBS           += -lvui
 
 ifeq ($(CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION), y)
@@ -289,6 +287,10 @@ endif
 endif
 
 
+ifeq ($(CONFIG_LVP_HAS_PITCH_SHIFT_MODE), y)
+LIBS            += -lpitchshift
+LIBS            += -limcra
+endif
 ifeq ($(CONFIG_DENOISE_ENABLE_GSC), y)
 LIBS           += -lgsc_earphone
 endif
@@ -296,6 +298,10 @@ LIBS           += -lcsky_CK804ef_dsp2_nn -lcsky_dsp -lvma -lcsky_dsp
 LIBS           += -lm -lc
 
 LIB_DIR         = lib
+ifeq ($(CONFIG_LVP_HAS_PITCH_SHIFT_MODE), y)
+LIB_DIR         += lvp/vma/pitchshift
+LIB_DIR         += lvp/vma/imcra
+endif
 ifeq ($(CONFIG_DENOISE_ENABLE_GSC), y)
 LIB_DIR        += lvp/vma/gsc
 endif
@@ -319,7 +325,7 @@ LDFLAGS        += $(LIB_FLAGS) $(LIBS)
 
 -include arch/Makefile
 -include utility/Makefile
-# -include drivers/Makefile
+-include drivers/Makefile
 -include boards/Makefile
 -include lvp/Makefile
 -include 3rdparty/Makefile
@@ -334,7 +340,7 @@ endif
 
 $(vma_objs):EXTRA_FLAGS := -mhard-float -D__FPU_PRESENT -fdata-sections -Wl,--gc-sections
 
-lib_objs        = $(boot_objs) $(dev_objs) $(utility_objs) $(common_objs) $(lvp_objs) $(kws_objs) $(vpr_objs) $(app_objs) $(denoise_objs)
+lib_objs        = $(boot_objs) $(dev_objs) $(utility_objs) $(common_objs) $(lvp_objs) $(kws_objs) $(ctc_decoder_objs) $(vpr_objs) $(app_objs) $(denoise_objs) $(gxdecoder_objs)
 
 ifeq ($(CONFIG_USE_OPUS), y)
 lib_objs += $(opus_objs)
@@ -362,11 +368,6 @@ all_deps        = $(subst .o,.d,$(all_objs))
 VERSION=0x42555858
 CCFLAGS += -DRELEASE_VERSION=$(VERSION)
 
-CCFLAGS  += -DCONFIG_MTD_FLASH_SPI -DCONFIG_FLASH_SPI_QUAD -DCONFIG_FLASH_SPI_32BITS
-CCFLAGS  += -DCONFIG_FLASH_SPI_XIP
-CCFLAGS  += -DCONFIG_DW_AHB_DMA -DCONFIG_DW_UART_DMA
-CCFLAGS  += -DCONFIG_I2C_STATIC_ALLOC_MEM
-
 $(adpcm_objs):CCFLAGS := $(CCFLAGS) -O2
 
 #=================================================================================#
@@ -380,11 +381,8 @@ build: .config
 
 else # .config is exit
 # Build objects
-ifdef gsc_objs
-build: prepare output/libmcu.a lib/libcsky_dsp.a lvp/vma/gsc/libgsc_earphone.a lib/libvma.a output/mcu.elf output/mcu.info.txt output/mcu.dump.txt
-else
-build: prepare output/libmcu.a lib/libcsky_dsp.a output/mcu.elf output/mcu.info.txt output/mcu.dump.txt
-endif
+#build: prepare output/libmcu.a lib/libcsky_dsp.a lvp/vma/gsc/libgsc_earphone.a lib/libvma.a lib/libdriver_release_v1.0.6.a output/mcu.elf output/mcu.info.txt output/mcu.dump.txt
+build: prepare output/libmcu.a lib/libcsky_dsp.a lib/libvma.a lib/libdriver_release_v1.0.6.a output/mcu.elf output/mcu.info.txt output/mcu.dump.txt
 ifneq ($(CONFIG_MCU_ENABLE_JTAG_DEBUG), y)
 build: output/mcu.bin checkbin
 endif # endif ifneq ($(CONFIG_MCU_ENABLE_JTAG_DEBUG), y)
@@ -403,12 +401,8 @@ else
 prepare:
 	@echo [Preparing lvp ...]
 	@mkdir -p output
-	@mkdir -p tmp_objs
-	@$(AR) -x lib/libdriver_release_v1.0.5.a
-	@mv *.o tmp_objs/
 	@$(CC) $(CCFLAGS) $(EXTRA_FLAGS) -E -x assembler-with-cpp -P -o output/mcu.ld arch/soc/$(CONFIG_SOC_MODEL)/link.ld
 endif
-
 
 ifdef ckdsp_objs
 lib/libcsky_dsp.a: $(ckdsp_objs)
@@ -438,7 +432,7 @@ output/libmcu.a: $(mcu_objs)
 
 output/mcu.elf: output/mcu.ld $(all_objs)
 	@echo [$(LD) linking $@]
-	$(LD) -o $@ -T $^ $(LDFLAGS)
+	@$(LD) -o $@ -T $^ $(LDFLAGS)
 	@size $@
 ifeq ($(VERSION), 0x42555858)
 	@echo -e "\033[33m  ____________________________/Warning\_________________________________  \033[0m"
@@ -528,8 +522,10 @@ endif
 clean:
 	@find .  -regex ".*[.][1-9][0-9][0-9][0-9][0-9]$$" | xargs rm -f
 	@find .  -regex ".*[.][1-9][0-9][0-9][0-9]$$" | xargs rm -f
-	@rm -f $(all_objs) $(all_deps) $(snpu_objs) $(ckdsp_objs) $(gsc_objs) $(vma_objs) $(vui_objs)
+	@rm -f $(all_objs) $(all_deps) $(snpu_objs) $(ckdsp_objs) $(gsc_objs) $(vma_objs)  $(vui_objs)
 	@rm -rf output
+	@rm -rf drivers
+	@cp -r drivers_lib drivers
 	@echo [Clean all]
 
 distclean: clean
@@ -650,9 +646,9 @@ endif
 	@rm -f ./output/lvp.zip
 	@cp ./docs/lvp_zip_readme.md output/README.md
 	@cp ./scripts/download.sh output/download.sh
-	#@git rev-parse HEAD >> output/README.md
+	@git rev-parse HEAD >> output/README.md
 	@echo "branch info:" >> output/README.md
-	#@git branch -v | awk '/\*/' >> output/README.md
+	@git branch -v | awk '/\*/' >> output/README.md
 	@echo "pc info:" >> output/README.md
 	@echo $$USER >> output/README.md
 	@pwd >> output/README.md

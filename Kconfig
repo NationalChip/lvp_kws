@@ -15,6 +15,9 @@ choice
 
     config GX8002
         bool "Grus Family [GX8002]"
+
+    config GX8003
+        bool "Grus Family [GX8003]"
 endchoice
 
 if GX8002
@@ -33,6 +36,17 @@ if GX8002
     endchoice
 endif
 
+if GX8003
+    choice
+        prompt "Chipset Type selects:"
+        default GX8003A
+
+        config GX8003A
+            bool "Grus Type GX8003A"
+
+    endchoice
+endif
+
 choice
     prompt "Boot selects:"
     default BOOT_BY_FLASH
@@ -44,7 +58,6 @@ choice
         bool "Boot by Uart and SPI"
 
     config BOOT_BY_FLASH
-        depends on GX8002B || GX8002A
         bool "Boot by Flash"
 endchoice
 
@@ -236,6 +249,11 @@ config HEAP_SIZE_KB
     depends on MCU_SUPPORT_HEAP
     int "HEAP SIZE (KBytes)"
     default 68
+
+config MCU_ENABLE_SPINAND_FLASH
+    bool "Enable Spi Nand Flash"
+    default n
+
 endmenu # MCU settings
 
 menu "NPU settings"
@@ -297,14 +315,12 @@ if STANDARD_FREQUENCY
     comment "|--> MCU 8M; SRAM 8M; NPU 8M; Flash 24M"
     if !MCU_ENABLE_XIP
         comment "|"
-        comment "'--> Dig LDO voltage: 0.924V"
+        comment "'--> Dig LDO voltage: 0.950V"
     endif
     if MCU_ENABLE_XIP
         comment "|"
-        comment "'--> Dig LDO voltage: 0.924V"
+        comment "'--> Dig LDO voltage: 0.950V"
     endif
-
-
 endif
 
 if HIGH_FREQUENCY
@@ -336,73 +352,17 @@ if CUSTOMIZE_FREQUENCY
         comment "!"
     endif
 
+    if !ENABLE_BYPASS_CORE_LDO
+        comment ""
+        comment ".____________________________/Warning\\_____________________________"
+        comment "!                  Dig LDO Voltage: 0.950V                          |"
+        comment "!___________________________________________________________________|"
+        comment "!"
+    endif
 
     config ENABLE_BYPASS_CORE_LDO
-        bool "|Enable bypass core ldo"
+        bool "Enable bypass core ldo"
         default n
-
-    if !ENABLE_BYPASS_CORE_LDO
-        config CUSTOMIZE_CORE_LDO_VOLTAGE
-            bool "Set core ldo voltage"
-            default n
-
-
-        if !CUSTOMIZE_CORE_LDO_VOLTAGE
-            if ENABLE_PLL_FREQUENCY_HIGH
-                comment "|"
-                comment "'-Dig LDO Voltage: 0.950V"
-            endif
-
-            if !ENABLE_PLL_FREQUENCY_HIGH
-                    comment "|"
-                    comment "'-Dig LDO Voltage: 0.924V"
-            endif
-        endif
-
-        if CUSTOMIZE_CORE_LDO_VOLTAGE
-            choice
-                prompt "Dig LDO Voltage:"
-                default CORE_LDO_VOLTAGE_950_MV
-
-                config CORE_LDO_VOLTAGE_950_MV
-                    bool "950 mV"
-
-                config CORE_LDO_VOLTAGE_924_MV
-                    bool "924 mV"
-
-                config CORE_LDO_VOLTAGE_897_MV
-                    bool "897 mV"
-
-                config CORE_LDO_VOLTAGE_871_MV
-                    bool "871 mV"
-
-                config CORE_LDO_VOLTAGE_845_MV
-                    bool "845 mV"
-
-                config CORE_LDO_VOLTAGE_819_MV
-                    bool "819 mV"
-
-                config CORE_LDO_VOLTAGE_792_MV
-                    bool "792 mV"
-
-                config CORE_LDO_VOLTAGE_766_MV
-                    bool "766 mV"
-
-                config CORE_LDO_VOLTAGE_740_MV
-                    bool "740 mV"
-
-                config CORE_LDO_VOLTAGE_714_MV
-                    bool "714 mV"
-
-                config CORE_LDO_VOLTAGE_687_MV
-                    bool "687 mV"
-
-                config CORE_LDO_VOLTAGE_661_MV
-                    bool "661 mV"
-
-            endchoice
-        endif
-    endif
 
     comment ""
 
@@ -437,7 +397,6 @@ if CUSTOMIZE_FREQUENCY
             select ENABLE_PLL_FREQUENCY_HIGH
             select ENABLE_BYPASS_CORE_LDO
     endchoice
-
 
     choice
         prompt "NPU Work Frequency:"
@@ -494,6 +453,10 @@ if ENABLE_PLL_FREQUENCY_HIGH
 
         config ENABLE_PLL_FREQUENCY_48M
             bool "48MHz"
+
+        config ENABLE_PLL_FREQUENCY_60M
+            bool "60MHz"
+            depends on GX8003
     endchoice
 endif
 
