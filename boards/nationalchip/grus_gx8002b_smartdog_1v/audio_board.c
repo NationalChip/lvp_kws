@@ -27,15 +27,15 @@ static LVP_AUDIO_IN_PARAM_CTRL g_audio_in_param_ctrl = {
 #if (defined CONFIG_TYPE_I2S_MASTER || defined CONFIG_TYPE_I2S_SLAVE)
                          | AUDIO_IN_I2S
 #endif
-#ifdef CONFIG_LVP_BUFFER_HAS_FFT
+#ifdef CONFIG_ENABLE_HARDWARE_FFT
                          | AUDIO_IN_FSPEC
 #endif
                          ,
 
     .input_source_config = {
         {
-            .pga_gain           = 24, // pga_gain 只支持模拟麦, 0-18dB，步进6dB, 19-48dB，步进1dB
-            .audio_in_gain      = AUDIO_IN_GAIN_0dB,
+            .pga_gain           = CONFIG_BOARD_MIC_GAIN_A, // pga_gain 只支持模拟麦, 0-18dB，步进6dB, 19-48dB，步进1dB
+            .audio_in_gain      = CONFIG_BOARD_MIC_GAIN_B,
 
             .dc_enable          = 1,
 #ifdef CONFIG_TYPE_AMIC
@@ -70,8 +70,8 @@ static LVP_AUDIO_IN_PARAM_CTRL g_audio_in_param_ctrl = {
 #endif
         },
         {
-            .pga_gain           = 0,
-            .audio_in_gain      = AUDIO_IN_GAIN_12dB,
+            .pga_gain           = CONFIG_BOARD_MIC_GAIN_A,
+            .audio_in_gain      = CONFIG_BOARD_MIC_GAIN_B,
 
             .dc_enable          = 1,
 #ifdef CONFIG_TYPE_DMIC
@@ -93,8 +93,8 @@ static LVP_AUDIO_IN_PARAM_CTRL g_audio_in_param_ctrl = {
             },
         },
         {
-            .pga_gain           = 0,
-            .audio_in_gain      = AUDIO_IN_GAIN_0dB,
+            .pga_gain           = CONFIG_BOARD_MIC_GAIN_A,
+            .audio_in_gain      = CONFIG_BOARD_MIC_GAIN_B,
 
             .dc_enable          = 1,
 

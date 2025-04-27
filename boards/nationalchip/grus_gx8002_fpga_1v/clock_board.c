@@ -141,6 +141,12 @@ static void _clk_mod_lowpower_init(void)
             if (gx_clock_get_module_source(module) == MODULE_SOURCE_PDM_SYS)
                 gx_clock_set_module_source(module, MODULE_SOURCE_PDM_OSC_1M);
             break;
+        case CLOCK_MODULE_AUDIO_IN_SYS:
+            if ((gx_clock_get_module_source(module) == MODULE_SOURCE_24M_PLL) &&
+                    (((*(volatile unsigned int*)PMU_CFG_SOURCE_SEL0) >> 6) & 0x1 == 1))
+                break;
+            gx_clock_set_module_source(module, MODULE_SOURCE_1M_12M);
+            break;
         default:
             gx_clock_set_module_source(module, MODULE_SOURCE_1M_12M);
             break;

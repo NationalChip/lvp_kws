@@ -156,6 +156,12 @@ static void _clk_mod_lowpower_init(void)
             if (gx_clock_get_module_source(module) == MODULE_SOURCE_PDM_SYS)
                 gx_clock_set_module_source(module, MODULE_SOURCE_PDM_OSC_1M);
             break;
+        case CLOCK_MODULE_AUDIO_IN_SYS:
+            if ((gx_clock_get_module_source(module) == MODULE_SOURCE_24M_PLL) &&
+                    (((*(volatile unsigned int*)PMU_CFG_SOURCE_SEL0) >> 6) & 0x1 == 1))
+                break;
+            gx_clock_set_module_source(module, MODULE_SOURCE_1M_12M);
+            break;
         default:
             gx_clock_set_module_source(module, MODULE_SOURCE_1M_12M);
             break;
@@ -301,61 +307,15 @@ void clk_switch_soft_off(void)
     *((unsigned int*)0xa0010018) = *((unsigned int*)0xa0010018) | 0x160;
 }
 
-int _dig_ldo_voltage(void)
-{
-#ifdef CONFIG_CORE_LDO_VOLTAGE_950_MV
-    return LDO_DIG_VOLTAGE_0_950V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_924_MV
-    return LDO_DIG_VOLTAGE_0_924V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_897_MV
-    return LDO_DIG_VOLTAGE_0_897V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_871_MV
-    return LDO_DIG_VOLTAGE_0_871V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_845_MV
-    return LDO_DIG_VOLTAGE_0_845V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_819_MV
-    return LDO_DIG_VOLTAGE_0_819V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_792_MV
-    return LDO_DIG_VOLTAGE_0_792V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_766_MV
-    return LDO_DIG_VOLTAGE_0_766V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_740_MV
-    return LDO_DIG_VOLTAGE_0_740V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_714_MV
-    return LDO_DIG_VOLTAGE_0_714V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_687_MV
-    return LDO_DIG_VOLTAGE_0_687V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_661_MV
-    return LDO_DIG_VOLTAGE_0_661V;
-#endif
-
-    return 0;
-}
 
 void clk_init(void)
 {
+#ifdef CONFIG_ENABLE_BYPASS_CORE_LDO
+    gx_analog_set_ldo_dig_ctrl(LDO_SW_CTRL_BYPASS);
+#endif
+
+    gx_clock_set_div(CLOCK_MODULE_SRAM, SRAM_DIV_PARAM);
+
     GX_START_MODE start_mode = gx_pmu_get_start_mode();
     if (start_mode == GX_START_MODE_ROM) {
         _clk_src_init();
@@ -400,17 +360,8 @@ void clk_init(void)
     writel(0x59, 0x48 + GX_REG_BASE_HW_I2C);
     writel(0x59, 0x4c + GX_REG_BASE_HW_I2C);
 
-
     gx_analog_set_ldo_ana_voltage(LDO_ANA_VOLTAGE_0_9V);
-# ifndef CONFIG_CUSTOMIZE_CORE_LDO_VOLTAGE
-#  if defined CONFIG_ENABLE_PLL_FREQUENCY_50M
     gx_analog_set_ldo_dig_voltage(LDO_DIG_VOLTAGE_0_950V);
-#  else
-    gx_analog_set_ldo_dig_voltage(LDO_DIG_VOLTAGE_0_924V);
-#  endif
-# else
-    gx_analog_set_ldo_dig_voltage(_dig_ldo_voltage());
-# endif
 #endif
 }
 

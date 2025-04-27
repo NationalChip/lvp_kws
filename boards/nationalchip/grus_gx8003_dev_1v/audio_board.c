@@ -1,5 +1,5 @@
 /* Grus
- * Copyright (C) 2001-2020 NationalChip Co., Ltd
+ * Copyright (C) 2001-2023 NationalChip Co., Ltd
  * ALL RIGHTS RESERVED!
  *
  * audio_board.h:

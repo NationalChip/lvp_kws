@@ -1,0 +1,3 @@
+config BOARD_BK32887_V1
+    bool "GX8002C BK32887 Board V1.0"
+    depends on GX8002C && BOARD_VENDOR_NATIONALCHIP

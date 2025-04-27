@@ -44,14 +44,21 @@ static GX_CLOCK_SOURCE_TABLE clk_src_osc_table[] = {
     {CLOCK_SOURCE_PLL_DTO     , 0}, /* CLOCK_SOURCE_OSC_PLL    | CLOCK_SOURCE_PIN_IN   */
 
     {CLOCK_SOURCE_1M_12M      , 1}, /* CLOCK_SOURCE_OSC_24M/2  | CLOCK_SOURCE_1M       */
+#if defined CONFIG_ENABLE_PLL_FREQUENCY
     {CLOCK_SOURCE_24M_PLL     , 1}, /* CLOCK_SOURCE_24M        | CLOCK_SOURCE_PLL_DTO  */
+#else
+    {CLOCK_SOURCE_24M_PLL     , 0}, /* CLOCK_SOURCE_24M        | CLOCK_SOURCE_PLL_DTO  */
+#endif
     {CLOCK_SOURCE_32K         , 0}, /* CLOCK_SOURCE_OSC_32K    | CLOCK_SOURCE_XTAL_32K */
 };
 
 /*********************** PLL CONFIG ***********************/
-#if defined CONFIG_ENABLE_PLL_FREQUENCY_50M
 static GX_CLOCK_PLL pll = {
+#if defined CONFIG_ENABLE_PLL_FREQUENCY
     .pll_enable      = 1,
+#else
+    .pll_enable      = 0,
+#endif
 
     .pll_in          = 32768,
     .pll_fvco        = 98304000,
@@ -69,27 +76,6 @@ static GX_CLOCK_PLL pll = {
     .pll_2nd3nd_lpf  = 0,
     .pll_lock_tiehi  = 0,
 };
-#else // ENABLE_PLL_FREQUENCY_24M
-static GX_CLOCK_PLL pll = {
-    .pll_enable      = 1,
-
-    .pll_in          = 32768,
-    .pll_fvco        = 98304000,
-    .pll_out         = 24576000,
-
-    .pll_div_in      = 0,
-    .pll_div_fb      = 3071,
-    .pll_icpsel      = 2,
-    .pll_bwsel_lpf   = 0,
-    .pll_vco_subband = 3,
-    .pll_div_out     = 1,
-
-    .pll_itrim       = 0,
-    .pll_vco_trim    = 4,
-    .pll_2nd3nd_lpf  = 0,
-    .pll_lock_tiehi  = 0,
-};
-#endif
 
 static int _clk_pll_init(void)
 {
@@ -175,7 +161,7 @@ static void _clk_mod_lowpower_init(void)
 
 static void _clk_pmu_normal_div_dto(void)
 {
-#if defined CONFIG_ENABLE_PLL_FREQUENCY_50M
+#if defined CONFIG_ENABLE_PLL_FREQUENCY
     gx_clock_set_dto(CLOCK_MODULE_AUDIO_IN_SYS, 0x01000000, 1); //49.152MHz --> 24.576MHz
 #else
     gx_clock_set_dto(CLOCK_MODULE_AUDIO_IN_SYS, 0x01000000, 0); //24.576MHz --> 12.288MHz
@@ -206,7 +192,7 @@ static void _clk_pmu_lowpower_div_dto(void)
 
 static void _clk_mcu_normal_div_dto(void)
 {
-#if defined CONFIG_ENABLE_PLL_FREQUENCY_50M
+#if defined CONFIG_ENABLE_PLL_FREQUENCY
     gx_clock_set_dto(CLOCK_MODULE_UART0_UART1, 0x01000000, 1); //49.152MHz --> 24.576MHz
     gx_clock_set_dto(CLOCK_MODULE_AUDIO_PLAY , 0x01000000, 1); //49.152MHz --> 24.576MHz
 #else
@@ -223,7 +209,7 @@ static void _clk_mcu_normal_div_dto(void)
     gx_clock_set_div(CLOCK_MODULE_NPU, NPU_DIV_PARAM);
     gx_clock_set_div(CLOCK_MODULE_FLASH_SPI, FLASH_DIV_PARAM);
 
-#if defined CONFIG_ENABLE_PLL_FREQUENCY_50M
+#if defined CONFIG_ENABLE_PLL_FREQUENCY
     gx_clock_set_div(CLOCK_MODULE_AUDIO_LODAC, 4);
     gx_clock_set_div(CLOCK_MODULE_GENERAL_SPI, 4);
 #else
@@ -321,13 +307,23 @@ void clk_switch_soft_off(void)
 
 void clk_init(void)
 {
+#ifdef CONFIG_ENABLE_BYPASS_CORE_LDO
+    gx_analog_set_ldo_dig_ctrl(LDO_SW_CTRL_BYPASS);
+#endif
+
+    gx_clock_set_div(CLOCK_MODULE_SRAM, SRAM_DIV_PARAM);
+
     GX_START_MODE start_mode = gx_pmu_get_start_mode();
     if (start_mode == GX_START_MODE_ROM) {
         _clk_src_init();
     } else if (start_mode == GX_START_MODE_SRAM) {
         GX_CLOCK_SOURCE_TABLE clk_sram_src_table[] = {
             {CLOCK_SOURCE_24M         , 0}, /* CLOCK_SOURCE_OSC_24M    | CLOCK_SOURCE_PIN_IN   */
+        #if defined CONFIG_ENABLE_PLL_FREQUENCY
             {CLOCK_SOURCE_24M_PLL     , 1}, /* CLOCK_SOURCE_24M        | CLOCK_SOURCE_PLL_DTO  */
+        #else
+            {CLOCK_SOURCE_24M_PLL     , 0}, /* CLOCK_SOURCE_24M        | CLOCK_SOURCE_PLL_DTO  */
+        #endif
         };
         if (stage2_trim_done == 1)
             gx_clock_set_pll(&pll);
@@ -349,10 +345,7 @@ void clk_init(void)
 
     gx_clock_set_module_enable(CLOCK_MODULE_HW_I2C, 1);
     //close 32k xtal
-	*(volatile int*)0xa0005084 &= ~(1<<0);
-
-	//close 24M osc
-	*(volatile int*)0xa0005060 &= ~(1<<1);
+    *(volatile int*)0xa0005084 &= ~(1<<0);
 
     // flash power down
     //*(volatile int*)0xa000003c = 1;

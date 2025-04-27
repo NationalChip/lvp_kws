@@ -1,5 +1,5 @@
 /* Grus
- * Copyright (C) 2001-2020 NationalChip Co., Ltd
+ * Copyright (C) 2001-2021 NationalChip Co., Ltd
  * ALL RIGHTS RESERVED!
  *
  * audio_board.h:
@@ -27,24 +27,19 @@ static LVP_AUDIO_IN_PARAM_CTRL g_audio_in_param_ctrl = {
 #if (defined CONFIG_TYPE_I2S_MASTER || defined CONFIG_TYPE_I2S_SLAVE)
                          | AUDIO_IN_I2S
 #endif
-#ifdef CONFIG_ENABLE_HARDWARE_FFT
-                         | AUDIO_IN_FSPEC
-#endif
                          ,
 
     .input_source_config = {
         {
-            .pga_gain           = CONFIG_BOARD_MIC_GAIN_A, // pga_gain 只支持模拟麦, 0-18dB，步进6dB, 19-48dB，步进1dB
-            .audio_in_gain      = CONFIG_BOARD_MIC_GAIN_B, // GX_AUDIO_IN_GAIN
+            .pga_gain           = 24, // pga_gain 只支持模拟麦, 0-18dB，步进6dB, 19-48dB，步进1dB
+            .audio_in_gain      = AUDIO_IN_GAIN_0dB,
 
-#ifdef CONFIG_TYPE_AMIC
             .dc_enable          = 1,
+#ifdef CONFIG_TYPE_AMIC
             .pcm_output_track   = (CONFIG_TYPE_AMIC_TRACK == 1) ? TRACK_MONO : TRACK_STEREO,
 #elif (defined CONFIG_TYPE_I2S_MASTER || defined CONFIG_TYPE_I2S_SLAVE)
-            .dc_enable          = 0,
             .pcm_output_track   = (CONFIG_TYPE_I2S_TRACK == 1) ? TRACK_MONO : TRACK_STEREO,
 #else
-            .dc_enable          = 1,
             .pcm_output_track   = TRACK_MONO,
 #endif
 #ifdef CONFIG_LVP_ENABLE_ENERGY_VAD
@@ -72,17 +67,15 @@ static LVP_AUDIO_IN_PARAM_CTRL g_audio_in_param_ctrl = {
 #endif
         },
         {
-            .pga_gain           = CONFIG_BOARD_MIC_GAIN_A, // pga_gain 只支持模拟麦, 0-18dB，步进6dB, 19-48dB，步进1dB
-            .audio_in_gain      = CONFIG_BOARD_MIC_GAIN_B, // GX_AUDIO_IN_GAIN
+            .pga_gain           = 0,
+            .audio_in_gain      = AUDIO_IN_GAIN_6dB,
 
-#ifdef CONFIG_TYPE_DMIC
             .dc_enable          = 1,
+#ifdef CONFIG_TYPE_DMIC
             .pcm_output_track   = (CONFIG_TYPE_DMIC_TRACK == 1) ? TRACK_MONO : TRACK_STEREO,
 #elif (defined CONFIG_TYPE_I2S_MASTER || defined CONFIG_TYPE_I2S_SLAVE)
-            .dc_enable          = 0,
             .pcm_output_track   = (CONFIG_TYPE_I2S_TRACK == 1) ? TRACK_MONO : TRACK_STEREO,
 #else
-            .dc_enable          = 1,
             .pcm_output_track   = TRACK_MONO,
 #endif
             .evad = {
@@ -97,14 +90,14 @@ static LVP_AUDIO_IN_PARAM_CTRL g_audio_in_param_ctrl = {
             },
         },
         {
-            .pga_gain           = CONFIG_BOARD_MIC_GAIN_A, // pga_gain 只支持模拟麦, 0-18dB，步进6dB, 19-48dB，步进1dB
-            .audio_in_gain      = CONFIG_BOARD_MIC_GAIN_B, // GX_AUDIO_IN_GAIN
+            .pga_gain           = 0,
+            .audio_in_gain      = AUDIO_IN_GAIN_0dB,
+
+            .dc_enable          = 1,
 
 #if (defined CONFIG_TYPE_I2S_MASTER || defined CONFIG_TYPE_I2S_SLAVE)
-            .dc_enable          = 0,
             .pcm_output_track   = (CONFIG_TYPE_I2S_TRACK == 1) ? TRACK_MONO : TRACK_STEREO,
 #else
-            .dc_enable          = 1,
             .pcm_output_track   = TRACK_MONO,
 #endif
             .evad = {
@@ -132,42 +125,28 @@ static LVP_AUDIO_IN_PARAM_CTRL g_audio_in_param_ctrl = {
         .i2s.pcm_length  = PCM_LENGTH_16BIT,
         .i2s.data_format = DATA_FORMAT_I2S,
         .i2s.bclk_sel    = BCLK_MODE_64FS,
-#ifdef CONFIG_PCM_SAMPLE_RATE_48K
-        .i2s.i2s_fs      = SAMPLE_RATE_48K,
-#else
         .i2s.i2s_fs      = SAMPLE_RATE_16K,
-#endif
     },
 
 
     .output_channel  = {
-#if (defined CONFIG_TYPE_AMIC || (defined CONFIG_ENABLE_HARDWARE_FFT) || (defined CONFIG_TYPE_DMIC && (defined CONFIG_TYPE_I2S_MASTER || defined CONFIG_TYPE_I2S_SLAVE)))
+#if (defined CONFIG_TYPE_AMIC || (defined CONFIG_TYPE_DMIC && (defined CONFIG_TYPE_I2S_MASTER || defined CONFIG_TYPE_I2S_SLAVE)))
         .pcm0 = 1,
 #else
         .pcm0 = 0,
 #endif
-#if (defined CONFIG_TYPE_DMIC || defined CONFIG_TYPE_I2S_MASTER || defined CONFIG_TYPE_I2S_SLAVE || ((defined CONFIG_TYPE_AMIC) && (defined CONFIG_ENABLE_HARDWARE_FFT)))
+#if (defined CONFIG_TYPE_DMIC || defined CONFIG_TYPE_I2S_MASTER || defined CONFIG_TYPE_I2S_SLAVE)
         .pcm1 = 1,
 #else
         .pcm1 = 0,
 #endif
-#ifdef CONFIG_ENABLE_HARDWARE_LOGFBANK
         .logfbank = 1,
-#else
-        .logfbank = 0,
-#endif
-#if (defined CONFIG_BOARD_HAS_AIN_I2S_OUT_MASTER || defined CONFIG_BOARD_HAS_AIN_I2S_OUT_SLAVE)
-        .i2s = 1,
-#else
         .i2s = 0,
-#endif
         .reserve = 0,
     },
     .pcm0 = {
         .endian = 0,
-#ifdef CONFIG_ENABLE_HARDWARE_FFT
-        .source = PCM_SOURCE_FSPEC,
-#elif (defined CONFIG_TYPE_AMIC)  // pcm0 优先选择sadc
+#if (defined CONFIG_TYPE_AMIC)  // pcm0 优先选择sadc
         .source = PCM_SOURCE_SADC,
 #else
         .source = PCM_SOURCE_I2SIN,
@@ -177,8 +156,6 @@ static LVP_AUDIO_IN_PARAM_CTRL g_audio_in_param_ctrl = {
         .endian = 0,
 #if (defined CONFIG_TYPE_DMIC)  // pcm1 优先选择pdm
         .source = PCM_SOURCE_PDM,
-#elif ((defined CONFIG_TYPE_AMIC) && (defined CONFIG_ENABLE_HARDWARE_FFT))
-        .source = PCM_SOURCE_SADC,
 #else
         .source = PCM_SOURCE_I2SIN,
 #endif
@@ -199,28 +176,8 @@ static LVP_AUDIO_IN_PARAM_CTRL g_audio_in_param_ctrl = {
         .i2s.bclk_sel    = BCLK_MODE_64FS,
         .i2s.i2s_fs      = SAMPLE_RATE_16K,
 
-#if (defined CONFIG_TYPE_AMIC)
-        .left_source     = I2S_SOURCE_SADC,
-        .right_source    = I2S_SOURCE_SADC,
-#elif (defined CONFIG_TYPE_DMIC)
-        .left_source     = I2S_SOURCE_PDM_LEFT,
-        .right_source    = I2S_SOURCE_PDM_RIGHT,
-#elif (defined CONFIG_TYPE_I2S_MASTER || defined CONFIG_TYPE_I2S_SLAVE)
         .left_source     = I2S_SOURCE_I2SIN_LEFT,
         .right_source    = I2S_SOURCE_I2SIN_RIGHT,
-#endif
-    },
-    .spectrum = {
-        .endian =ENDIAN_LITTLE_16BIT,
-#if (defined CONFIG_TYPE_AMIC)
-        .source = LOGFBANK_SOURCE_SADC,
-#elif (defined CONFIG_TYPE_DMIC)
-        .source = LOGFBANK_SOURCE_PDM_LEFT,
-#elif (defined CONFIG_TYPE_I2S_MASTER)
-        .source = LOGFBANK_SOURCE_I2SIN_LEFT,
-#elif (defined CONFIG_TYPE_I2S_SLAVE)
-        .source = LOGFBANK_SOURCE_I2SIN_LEFT,
-#endif
     }
 };
 
@@ -269,3 +226,4 @@ void AudioInBoardInit(void)
     printf (LOG_TAG"dmic Ain_gain:[%d dB]\n", _AudioInGainMap(g_audio_in_param_ctrl.input_source_config[1].audio_in_gain));
 #endif
 }
+

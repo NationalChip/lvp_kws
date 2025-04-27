@@ -1,20 +1,20 @@
 # Voice Signal Preprocess
-# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# Copyright (C) 2001-2023 NationalChip Co., Ltd
 # ALL RIGHTS RESERVED!
 #
 # Kconfig
 #---------------------------------------------------------------------------------#
 
-if BOARD_GX8002B_DEV_V1
+if BOARD_GX8003_DEV_V1
 
 config BOARD_MODEL
-    default "grus_gx8002b_dev_1v"
+    default "grus_gx8003_dev_1v"
 
 config BOARD_VENDOR
     default "nationalchip"
 
 config SYS_CONFIG_NAME
-    default "grus_gx8002b_dev_1v"
+    default "grus_gx8003_dev_1v"
 
 #-------------------------------------------------#
 # Board Version
@@ -22,7 +22,7 @@ config SYS_CONFIG_NAME
 choice
     prompt "Board version selects: "
 
-    config BOARD_GX8002B_DEV_1V0
+    config BOARD_GX8003_DEV_1V0
         bool "V1.0"
 
 endchoice
@@ -32,7 +32,7 @@ comment "some options may be conflict             -WATCH OUT!-"
 comment "Select what you want"
 comment "-----------------------------------------------------"
 
-if BOARD_GX8002B_DEV_1V0
+if BOARD_GX8003_DEV_1V0
 
     config BOARD_NO_DMIC
         bool "Disable DMIC"
@@ -80,10 +80,6 @@ if BOARD_GX8002B_DEV_1V0
         bool "Support DAC out"
         default n
 
-    config BOARD_HAS_SPI_MASTER
-        bool "Support SPI MASTER"
-        default n
-
     config BOARD_HAS_SPI_SLAVE
         bool "Support SPI SLAVE"
         default n
@@ -96,30 +92,6 @@ if BOARD_GX8002B_DEV_1V0
         bool "Support AudioIn I2S IN Slave mode"
         default n
 
-    config BOARD_HAS_AIN_I2S_OUT_MASTER
-        bool "Support AudioIn I2S Out Master mode"
-        default n
-
-    config BOARD_HAS_AIN_I2S_OUT_SLAVE
-        bool "Support AudioIn I2S Out Slave mode"
-        default n
-
-    config BOARD_HAS_I2S_FIVE_WIRE_MODE
-        bool "Support I2S five wire mode, audio in I2S master + audio out I2S slave"
-        default n
-
-    config BOARD_HAS_AOUT_I2S_M
-        bool "Support AudioOut I2S Master"
-        default n
-
-    config BOARD_HAS_AOUT_I2S_S
-        bool "Support AudioOut I2S Slave"
-        default n
-        if BOARD_HAS_AOUT_I2S_S
-            config AIN_AOUT_SAME_CLOCK
-                bool "AudioIn and AudioOut set the same clock"
-                default n
-        endif
 
 comment "-----------------------------------------------------"
 

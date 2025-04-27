@@ -113,7 +113,25 @@ if BOARD_GX8002B_SMARTDOG_1V1 || BOARD_GX8002B_SMARTDOG_1V2
     config BOARD_HAS_AOUT_I2S_S
         bool "Support AudioOut I2S Slave"
         default n
+
+comment "-----------------------------------------------------"
+
+    config BOARD_MIC_GAIN_A
+        int "Mic gain (pga), See help for details "
+        default 24
+        range 0 48
+        help
+            0-18dB，Step 6dB; 19-48dB，Step 1dB
+
+    config BOARD_MIC_GAIN_B
+        int "Mic gain (AudioIn), See help for details "
+        default 0
+        range 0 9
+        help
+            0-9 mapping 0-54dB, Step 6dB
+
 endif
+
 endmenu
 
 #-------------------------------------------------#

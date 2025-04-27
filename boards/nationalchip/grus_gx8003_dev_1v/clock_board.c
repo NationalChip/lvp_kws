@@ -1,5 +1,5 @@
 /* LVP
- * Copyright (C) 2001-2020 NationalChip Co., Ltd
+ * Copyright (C) 2001-2023 NationalChip Co., Ltd
  * ALL RIGHTS RESERVED!
  *
  * clock_board.c
@@ -49,7 +49,7 @@ static GX_CLOCK_SOURCE_TABLE clk_src_osc_table[] = {
 };
 
 /*********************** PLL CONFIG ***********************/
-#if defined CONFIG_ENABLE_PLL_FREQUENCY_50M
+#if (defined CONFIG_ENABLE_PLL_FREQUENCY_50M)
 static GX_CLOCK_PLL pll = {
     .pll_enable      = 1,
 
@@ -66,6 +66,46 @@ static GX_CLOCK_PLL pll = {
 
     .pll_itrim       = 0,
     .pll_vco_trim    = 4,
+    .pll_2nd3nd_lpf  = 0,
+    .pll_lock_tiehi  = 0,
+};
+#elif (defined CONFIG_ENABLE_PLL_FREQUENCY_48M)
+static GX_CLOCK_PLL pll = {
+    .pll_enable      = 1,
+
+    .pll_in          = 32768,
+    .pll_fvco        = 98304000,
+    .pll_out         = 48000000,
+
+    .pll_div_in      = 0,
+    .pll_div_fb      = 2999,
+    .pll_icpsel      = 2,
+    .pll_bwsel_lpf   = 0,
+    .pll_vco_subband = 3,
+    .pll_div_out     = 0,
+
+    .pll_itrim       = 0,
+    .pll_vco_trim    = 4,
+    .pll_2nd3nd_lpf  = 0,
+    .pll_lock_tiehi  = 0,
+};
+#elif (defined CONFIG_ENABLE_PLL_FREQUENCY_60M)
+static GX_CLOCK_PLL pll = {
+    .pll_enable      = 1,
+
+    .pll_in          = 32000,
+    .pll_fvco        = 122880000,
+    .pll_out         = 61440000,
+
+    .pll_div_in      = 0,
+    .pll_div_fb      = 3839,
+    .pll_icpsel      = 2,
+    .pll_bwsel_lpf   = 0,
+    .pll_vco_subband = 3,
+    .pll_div_out     = 0,
+
+    .pll_itrim       = 0,
+    .pll_vco_trim    = 2,
     .pll_2nd3nd_lpf  = 0,
     .pll_lock_tiehi  = 0,
 };
@@ -93,10 +133,11 @@ static GX_CLOCK_PLL pll = {
 
 static int _clk_pll_init(void)
 {
-    int pll_div_fb[5] = {3071, 3081, 3086, 3061, 3056}; //0, +10, +15, -10, -15
-    for (int i = 0; i < sizeof(pll_div_fb); i++)
+	int pll_div_fb = pll.pll_div_fb;
+	int offs[] = {0, 10, -10 };
+    for (int i = 0; i < sizeof(offs)/sizeof(int); i++)
     {
-        pll.pll_div_fb = pll_div_fb[i];
+        pll.pll_div_fb = pll_div_fb + offs[i];
         if (gx_clock_set_pll_no_block(&pll, 40) == 0)
             return 0;
     }
@@ -162,7 +203,7 @@ static void _clk_mod_lowpower_init(void)
             break;
         case CLOCK_MODULE_AUDIO_IN_SYS:
             if ((gx_clock_get_module_source(module) == MODULE_SOURCE_24M_PLL) &&
-                    (((*(volatile unsigned int*)PMU_CFG_SOURCE_SEL0) >> 6) & 0x1 == 1))
+                    ((((*(volatile unsigned int*)PMU_CFG_SOURCE_SEL0) >> 6) & 0x1) == 1))
                 break;
             gx_clock_set_module_source(module, MODULE_SOURCE_1M_12M);
             break;
@@ -175,8 +216,12 @@ static void _clk_mod_lowpower_init(void)
 
 static void _clk_pmu_normal_div_dto(void)
 {
-#if defined CONFIG_ENABLE_PLL_FREQUENCY_50M
+#if (defined CONFIG_ENABLE_PLL_FREQUENCY_50M)
     gx_clock_set_dto(CLOCK_MODULE_AUDIO_IN_SYS, 0x01000000, 1); //49.152MHz --> 24.576MHz
+#elif (defined CONFIG_ENABLE_PLL_FREQUENCY_48M)
+    gx_clock_set_dto(CLOCK_MODULE_AUDIO_IN_SYS, 0x0083126F, 1); //48MHz --> 12.288MHz
+#elif (defined CONFIG_ENABLE_PLL_FREQUENCY_60M)
+    gx_clock_set_dto(CLOCK_MODULE_AUDIO_IN_SYS, 0x00CCCCCD, 1);
 #else
     gx_clock_set_dto(CLOCK_MODULE_AUDIO_IN_SYS, 0x01000000, 0); //24.576MHz --> 12.288MHz
 #endif
@@ -189,7 +234,11 @@ static void _clk_pmu_normal_div_dto(void)
 #if defined(CONFIG_BOARD_HAS_AIN_I2S_OUT_SLAVE) // IIS 输入时钟为12.288MHz时，需如此配置
     gx_clock_set_div(CLOCK_MODULE_AUDIO_IN_SYS,  0);
 #else
+#if (defined CONFIG_ENABLE_PLL_FREQUENCY_48M)
+    gx_clock_set_div(CLOCK_MODULE_AUDIO_IN_SYS,  0);
+#else
     gx_clock_set_div(CLOCK_MODULE_AUDIO_IN_SYS,  2);
+#endif
 #endif
     gx_clock_set_div(CLOCK_MODULE_AUDIO_IN_ADC, 384);
     gx_clock_set_div(CLOCK_MODULE_AUDIO_IN_PDM, 12);
@@ -206,9 +255,14 @@ static void _clk_pmu_lowpower_div_dto(void)
 
 static void _clk_mcu_normal_div_dto(void)
 {
-#if defined CONFIG_ENABLE_PLL_FREQUENCY_50M
+#if (defined CONFIG_ENABLE_PLL_FREQUENCY_50M)
     gx_clock_set_dto(CLOCK_MODULE_UART0_UART1, 0x01000000, 1); //49.152MHz --> 24.576MHz
-    gx_clock_set_dto(CLOCK_MODULE_AUDIO_PLAY , 0x01000000, 1); //49.152MHz --> 24.576MHz
+    gx_clock_set_dto(CLOCK_MODULE_AUDIO_PLAY , 0x00800000, 1); //49.152MHz --> 12.288MHz
+#elif (defined CONFIG_ENABLE_PLL_FREQUENCY_48M)
+    gx_clock_set_dto(CLOCK_MODULE_AUDIO_PLAY , 0x0083126F, 1); //48MHz --> 12.288MHz
+#elif (defined CONFIG_ENABLE_PLL_FREQUENCY_60M)
+    gx_clock_set_dto(CLOCK_MODULE_UART0_UART1, 0x00CCCCCD, 1);
+    gx_clock_set_dto(CLOCK_MODULE_AUDIO_PLAY , 0x666666, 1); //61MHz --> 12.288MHz
 #else
     gx_clock_set_dto(CLOCK_MODULE_UART0_UART1, 0x01000000, 0); //24.576MHz --> 12.288MHz
     gx_clock_set_dto(CLOCK_MODULE_AUDIO_PLAY , 0x01000000, 1); //24.576MHz --> 12.288MHz
@@ -223,7 +277,7 @@ static void _clk_mcu_normal_div_dto(void)
     gx_clock_set_div(CLOCK_MODULE_NPU, NPU_DIV_PARAM);
     gx_clock_set_div(CLOCK_MODULE_FLASH_SPI, FLASH_DIV_PARAM);
 
-#if defined CONFIG_ENABLE_PLL_FREQUENCY_50M
+#if (defined CONFIG_ENABLE_PLL_FREQUENCY_50M || defined CONFIG_ENABLE_PLL_FREQUENCY_48M || defined CONFIG_ENABLE_PLL_FREQUENCY_60M)
     gx_clock_set_div(CLOCK_MODULE_AUDIO_LODAC, 4);
     gx_clock_set_div(CLOCK_MODULE_GENERAL_SPI, 4);
 #else
@@ -321,6 +375,12 @@ void clk_switch_soft_off(void)
 
 void clk_init(void)
 {
+#ifdef CONFIG_ENABLE_BYPASS_CORE_LDO
+    gx_analog_set_ldo_dig_ctrl(LDO_SW_CTRL_BYPASS);
+#endif
+
+    gx_clock_set_div(CLOCK_MODULE_SRAM, SRAM_DIV_PARAM);
+
     GX_START_MODE start_mode = gx_pmu_get_start_mode();
     if (start_mode == GX_START_MODE_ROM) {
         _clk_src_init();

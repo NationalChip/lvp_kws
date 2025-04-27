@@ -13,6 +13,7 @@
 #include <driver/gx_pmu_osc.h>
 #include <driver/gx_flash.h>
 #include <driver/gx_analog/gx_ldo.h>
+#include <driver/gx_i2s/gx_i2s_v2.h>
 
 /******************* CLOCK SOURCE CONFIG *******************/
 static GX_CLOCK_SOURCE_TABLE clk_src_xtal_table[] = {
@@ -157,6 +158,9 @@ static void _clk_mod_normal_init(void)
     gx_clock_set_module_source(CLOCK_MODULE_AUDIO_IN_ADC, MODULE_SOURCE_ADC_SYS);
     //gx_clock_set_module_source(CLOCK_MODULE_AUDIO_IN_PDM, MODULE_SOURCE_PDM_OSC_1M);
     gx_clock_set_module_source(CLOCK_MODULE_AUDIO_IN_PDM, MODULE_SOURCE_PDM_SYS);
+#ifdef CONFIG_AIN_AOUT_SAME_CLOCK
+    gx_i2s_set_five_wire_mode(I2S_MODE_I2S_IN_S_I2S_OUT_S_FROM_I2S_OUT);
+#endif
     gx_clock_set_module_source(CLOCK_MODULE_OSC_REF     , MODULE_SOURCE_1M_12M);
 
     gx_clock_set_module_source(CLOCK_MODULE_TIMER_WDT   , MODULE_SOURCE_1M_12M);
@@ -209,7 +213,7 @@ static void _clk_pmu_normal_div_dto(void)
     gx_clock_set_div(CLOCK_MODULE_RTC         ,  4);
     gx_clock_set_div(CLOCK_MODULE_PMU         ,  3);
     gx_clock_set_div(CLOCK_MODULE_FFT         ,  2);
-#if defined(CONFIG_BOARD_HAS_AIN_I2S_OUT_SLAVE) // IIS 输入时钟为12.288MHz时，需如此配置
+#if defined(CONFIG_BOARD_HAS_AIN_I2S_OUT_SLAVE) || defined(CONFIG_AIN_AOUT_SAME_CLOCK)// 用IIS slave 输入时钟时，需如此配置
     gx_clock_set_div(CLOCK_MODULE_AUDIO_IN_SYS,  0);
 #else
 #if (defined CONFIG_ENABLE_PLL_FREQUENCY_48M)
@@ -348,61 +352,14 @@ void clk_switch_soft_off(void)
     *((unsigned int*)0xa0010018) = *((unsigned int*)0xa0010018) | 0x160;
 }
 
-int _dig_ldo_voltage(void)
-{
-#ifdef CONFIG_CORE_LDO_VOLTAGE_950_MV
-    return LDO_DIG_VOLTAGE_0_950V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_924_MV
-    return LDO_DIG_VOLTAGE_0_924V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_897_MV
-    return LDO_DIG_VOLTAGE_0_897V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_871_MV
-    return LDO_DIG_VOLTAGE_0_871V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_845_MV
-    return LDO_DIG_VOLTAGE_0_845V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_819_MV
-    return LDO_DIG_VOLTAGE_0_819V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_792_MV
-    return LDO_DIG_VOLTAGE_0_792V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_766_MV
-    return LDO_DIG_VOLTAGE_0_766V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_740_MV
-    return LDO_DIG_VOLTAGE_0_740V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_714_MV
-    return LDO_DIG_VOLTAGE_0_714V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_687_MV
-    return LDO_DIG_VOLTAGE_0_687V;
-#endif
-
-#ifdef CONFIG_CORE_LDO_VOLTAGE_661_MV
-    return LDO_DIG_VOLTAGE_0_661V;
-#endif
-
-    return 0;
-}
-
 void clk_init(void)
 {
+#ifdef CONFIG_ENABLE_BYPASS_CORE_LDO
+    gx_analog_set_ldo_dig_ctrl(LDO_SW_CTRL_BYPASS);
+#endif
+
+    gx_clock_set_div(CLOCK_MODULE_SRAM, SRAM_DIV_PARAM);
+
     GX_START_MODE start_mode = gx_pmu_get_start_mode();
     if (start_mode == GX_START_MODE_ROM) {
         _clk_src_init();
@@ -450,17 +407,8 @@ void clk_init(void)
     writel(0x59, 0x48 + GX_REG_BASE_HW_I2C);
     writel(0x59, 0x4c + GX_REG_BASE_HW_I2C);
 
-
     gx_analog_set_ldo_ana_voltage(LDO_ANA_VOLTAGE_0_9V);
-# ifndef CONFIG_CUSTOMIZE_CORE_LDO_VOLTAGE
-#if (defined CONFIG_ENABLE_PLL_FREQUENCY_50M || defined CONFIG_ENABLE_PLL_FREQUENCY_48M)
     gx_analog_set_ldo_dig_voltage(LDO_DIG_VOLTAGE_0_950V);
-#  else
-    gx_analog_set_ldo_dig_voltage(LDO_DIG_VOLTAGE_0_924V);
-#  endif
-# else
-    gx_analog_set_ldo_dig_voltage(_dig_ldo_voltage());
-# endif
 #endif
 }
 

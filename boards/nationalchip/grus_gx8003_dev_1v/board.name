@@ -1,0 +1,3 @@
+config BOARD_GX8003_DEV_V1
+    bool "GX8003 DEV Board V1.0"
+    depends on GX8003A && BOARD_VENDOR_NATIONALCHIP
