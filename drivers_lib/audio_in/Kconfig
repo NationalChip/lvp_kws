@@ -1,0 +1,57 @@
+menuconfig GX_AUDIO_IN
+    bool "AudioIn Support"
+    default n
+    help
+      If you say Y here, you will enable support for Ain driver.
+
+if GX_AUDIO_IN
+config GX_AUDIO_IN_VERSION
+	string
+	default "v1.0" if (ARCH_LEO) || (ARCH_LEO_MINI)
+	default "v2.0" if (ARCH_GRUS)
+	default "v3.0" if (ARCH_AQUILA_AUDIO)
+
+config GX_AUDIO_IN_DEBUG
+    bool "Debug Support for Audio In driver"
+    default n
+    help
+      If you enable Ain Debug option, it will print some important message.
+
+config GX_AUDIO_IN_TEST
+    bool "Audio In Test Case"
+    default n
+    select I2C
+    select CMD_AUDIO_IN
+    help
+      If you say Y here, you will enable support for Ain driver test demo.
+
+config GX_AUDIO_IN_V1
+    bool
+
+config GX_AUDIO_IN_V2
+    bool
+    depends on GX_AUDIO_IN_VERSION="v2.0"
+    select GX_ANALOG
+    select GX_ANALOG_ADC
+    select GX_I2S
+    default y
+
+config GX_AUDIO_IN_V3
+    bool
+    depends on GX_AUDIO_IN_VERSION="v3.0"
+
+endif #GX_AUDIO_IN
+
+menuconfig GX_AUDIO_IN_LITE
+    bool "AudioIn Lite Supprot"
+	default n
+    depends on GX_AUDIO_IN_VERSION="v3.0"
+
+if GX_AUDIO_IN_LITE
+config GX_AUDIO_IN_LITE_TEST
+	bool "Audio In Lite Test Case"
+	default n
+	select CMD_AUDIO_IN_LITE
+	help
+		If you say Y here, you will enable support for Ain driver test demo.
+endif
