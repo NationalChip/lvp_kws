@@ -2,93 +2,70 @@
  * Copyright (C) 2001-2020 NationalChip Co., Ltd
  * ALL RIGHTS RESERVED!
  *
- * lvp_app_voice_controller.c
+ * lvp_app_voice_controller_v2.c
  *
  */
 
 #include <lvp_app.h>
 #include <lvp_buffer.h>
-#include "vc_led.h"
 #include "vc_message.h"
 #include <lvp_pmu.h>
 #include <lvp_board.h>
-#include <lvp_system_init.h>
-#include <multi_button/src/multi_button.h>
 #include <driver/gx_gpio.h>
 #include <autoconf.h>
 
-#define LOG_TAG "[VOICE_CONTROLLER]"
-
+#define LOG_TAG "[VOICE_CONTROLLER_V2]"
 static int pmu_lock = 0;
 static char app_init = 0;
 //=================================================================================================
-
-static char power_save_mode = 0;
-
-static void leavePowSaveMode(void)
+#ifdef CONFIG_UART_AWAKE
+static int gpio_callback(int port, void *pdata)
 {
-    BoardSetUserPinMux();
-    power_save_mode = 0;
+    printf("%s %d\n", __func__, __LINE__);
 }
-
-static void enterPowSaveMode(void)
-{
-    BoardSetPowerSavePinMux();
-    power_save_mode = 1;
-}
+#endif
 
 static int VoiceControllerSuspend(void *priv)
 {
-    PickupLedOff();
+    // BoardSetPowerSavePinMux();//根据具体项目进该函数配置低功耗下管脚模式及状态
 
     //printf("%s\n", (unsigned char *)priv);
+    
+#ifdef CONFIG_UART0_AWAKE
+    padmux_set(6 , 1);
+    gx_gpio_set_direction(6, GX_GPIO_DIRECTION_INPUT);
+    gx_gpio_enable_trigger(6, GX_GPIO_TRIGGER_EDGE_FALLING, gpio_callback, NULL);
+#endif
 
+#ifdef CONFIG_UART1_AWAKE
+    padmux_set(12 , 1);
+    gx_gpio_set_direction(12, GX_GPIO_DIRECTION_INPUT);
+    gx_gpio_enable_trigger(12, GX_GPIO_TRIGGER_EDGE_FALLING, gpio_callback, NULL);
+#endif
     return 0;
+ 
 }
 
 static int VoiceControllerResume(void *priv)
 {
-    if(power_save_mode == 1) {
-        enterPowSaveMode();
-    }
-
-    PickupLedOn();
+    BoardSetUserPinMux();
 
     //printf("%s\n", (unsigned char *)priv);
+    
+#ifdef CONFIG_UART0_AWAKE
+    padmux_set(6 , 0);
+#endif
 
+#ifdef CONFIG_UART1_AWAKE
+    padmux_set(12 , 0);
+#endif
     return 0;
 }
-#ifdef CONFIG_BOARD_SUPPORT_MULTIBOOT
-static Button denoise_toggle_key;
-static unsigned char _readToggleKeyValue(void)
-{
-    unsigned char ret = gx_gpio_get_level(2);
-    return ret;
-}
-
-static void _toggleKeySingleClickHandler(void *btn)
-{
-    SwitchAnotherFirmeware();
-}
-
-static void _toggleKeyInit(void)
-{
-    gx_gpio_set_direction(2, GX_GPIO_DIRECTION_INPUT);
-    button_init(&denoise_toggle_key, _readToggleKeyValue, 0);
-    button_attach(&denoise_toggle_key, SINGLE_CLICK, _toggleKeySingleClickHandler);
-    button_start(&denoise_toggle_key);
-    LvpButtonInit();
-}
-#endif
 
 static int VoiceControllerInit(void)
 {
-#ifdef CONFIG_BOARD_SUPPORT_MULTIBOOT
-    _toggleKeyInit();
-#endif
     if(!app_init) {
         //printf(LOG_TAG" ---- %s ----\n", __func__);
-        PickupLedOn();
 
         VCMessageInit();
         LvpPmuSuspendLockCreate(&pmu_lock);
@@ -107,21 +84,20 @@ static int VoiceControllerEventResponse(APP_EVENT *app_event)
 
         printf("[%s]%d kws: %d\n", __func__, __LINE__, event_id);
 
-        if(event_id == 107) {
-            leavePowSaveMode();
-            //open led
-            EnableGpioLed();
-            PickupLedOn();
-            KwsLedFlicker(800, 0, 1);
-        } else if(event_id == 108) {
-            enterPowSaveMode();
-            //close led
-            KwsLedFlicker(150, 150, 2);
-            PickupLedOff();
-            DisableGpioLed();
-        } else {
+        if(event_id == 100) {
+        //根据具体项目的event_id执行相应操作
+
             VCNewMessageNotify(event_id);
-            KwsLedFlicker(300, 0, 1);
+
+        } else if(event_id == 101) {
+        //
+
+            VCNewMessageNotify(event_id);
+
+        } else {
+        //
+            VCNewMessageNotify(event_id);
+            
         }
     }
 
@@ -139,8 +115,8 @@ static int VoiceControllerTaskLoop(void)
     return 0;
 }
 
-LVP_APP voice_controller_app = {
-    .app_name = "voice controller",
+LVP_APP voice_controller_v2_app = {
+    .app_name = "voice controller v2",
     .AppInit = VoiceControllerInit,
     .AppEventResponse = VoiceControllerEventResponse,
     .AppTaskLoop = VoiceControllerTaskLoop,
@@ -150,5 +126,5 @@ LVP_APP voice_controller_app = {
     .resume_priv = "VoiceControllerResume",
 };
 
-LVP_REGISTER_APP(voice_controller_app);
+LVP_REGISTER_APP(voice_controller_v2_app);
 

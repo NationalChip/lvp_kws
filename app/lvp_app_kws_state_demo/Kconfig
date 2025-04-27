@@ -23,6 +23,9 @@ if LVP_APP_KWS_STATE_DEMO
 
         config MCU_LOW_FREQUENCY_24M
             bool "24M"
+
+        config MCU_LOW_FREQUENCY_50M
+            bool "50M"
     endchoice
 
     config APP_VC_HAS_LED

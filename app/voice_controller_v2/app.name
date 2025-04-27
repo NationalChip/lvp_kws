@@ -1,0 +1,13 @@
+# LVP
+# Copyright (C) 2001-2020 NationalChip Co., Ltd
+# ALL RIGHTS RESERVED!
+#
+# app.name
+#
+#---------------------------------------------------------------------------------#
+
+config LVP_APP_VOICE_CONTROLLER_V2
+    bool "Voice Controller V2"
+    help
+        "Voice Controller V2"
+
