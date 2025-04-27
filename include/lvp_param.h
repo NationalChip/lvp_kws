@@ -92,6 +92,9 @@ typedef struct {
     short labels[16];             // The label of key words
     int  label_length;           // The length of key label
     int  threshold;              // The threshold of kws
+#ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+    int bk_threshold;
+#endif
 #ifdef CONFIG_KWS_TYPE_HYBRID
     int  xip_threshold;         // The threshold of xip kws
 #endif

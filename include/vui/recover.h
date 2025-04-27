@@ -21,5 +21,9 @@ int RecoverInit(void);
 int ResetDeHanmingWiondowBuffer(void);
 int RecoverDenoiseWav(LVP_CONTEXT *context, float *amp, float *phase, float *ifft_tmp_buffer, float *ifft_out_buffer, short *wav);
 int RecoverWav(float *amp, float *phase, float *ifft_tmp_buffer, float *ifft_out_buffer, short *wav);
+// int RecoverDenoiseMaskWav(float *amp, float *phase, float *mask,int len, float *ifft_tmp_buffer, float *ifft_out_buffer, short *wav);
+int RecoverDenoiseMaskWav(LVP_CONTEXT *context, float *amp, float *phase, float *mask,int len, float *ifft_tmp_buffer, float *ifft_out_buffer, short *wav);
+
+
 float getNoisyWin(void);
 #endif /* __RECOVER_H__ */

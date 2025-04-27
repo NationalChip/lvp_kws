@@ -23,6 +23,8 @@ void *LvpDenoiseModelGetSnpuFeatsBuffer(void *snpu_buffer);
 void *LvpDenoiseModelGetSnpuOutBuffer(void *snpu_buffer);
 int LvpDenoiseModelGetSnpuFeatsSize(void *snpu_buffer);
 int LvpDenoiseModelGetOutBufferSize(void *snpu_buffer);
+void *LvpDenoiseModelGetSnpuStatesBuffer(void *snpu_buffer);
+int LvpDenoiseModelGetSnpustatesSize(void *snpu_buffer);
 
 
 #endif /* __CTC_MODEL_H__ */

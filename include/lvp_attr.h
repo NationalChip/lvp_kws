@@ -33,6 +33,12 @@
 #define DRAM0_NPU_CMD_ATTR      __attribute__((section(".cmd")))
 #define DRAM0_NPU_WEIGHT_ATTR   __attribute__((section(".weight")))
 
+#ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
+# define BUNKWS_NPU_ATTR          __attribute__((section(".bunkws_npu_section")))
+# define BUNKWS_NPU_CMD_ATTR      __attribute__((section(".bunkws_cmd")))
+# define BUNKWS_NPU_WEIGHT_ATTR   __attribute__((section(".bunkws_weight")))
+#endif
+
 #define DRAM0_NC_NPU_ATTR          __attribute__((section(".nc_npu_section")))
 #define DRAM0_NC_NPU_CMD_ATTR      __attribute__((section(".nc_cmd")))
 #define DRAM0_NC_NPU_WEIGHT_ATTR   __attribute__((section(".nc_weight")))

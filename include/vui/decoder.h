@@ -11,7 +11,6 @@
 
 #include <lvp_param.h>
 #include <lvp_context.h>
-#include <autoconf.h>
 
 typedef struct {
     int cnt;
@@ -41,6 +40,7 @@ typedef enum
 int LvpSetVuiKwsStates(VUI_KWS_STATE state);
 int LvpGetVuiKwsStates(void);
 
+void ResetMaxWindow(void);
 void ResetCtcWinodw(void);
 void ResetCtcWinodwUser(int start, int len);
 float LvpCtcScoreKws(float* probs, int T, int alphabet_size, int blank, unsigned short *labels, int labels_length);
@@ -55,6 +55,8 @@ int LvpCtcMask(LVP_CTC_MASK *mask, int mask_num);
 int LvpDoKwsScore(LVP_CONTEXT *context);
 int LvpDoUserDecoder(LVP_CONTEXT *context);
 float fastlogf (float x);
+
+
 
 # if defined(CONFIG_LVP_ENABLE_CTC_DECODER)||defined(CONFIG_LVP_ENABLE_CTC_AND_BEAMSEARCH_DECODER)
 int KwsCtcBeamSearchLmInit(unsigned char *lm, unsigned char *lst);
@@ -79,6 +81,13 @@ int KwsCtcBeamSearchScore(float          *probs_seq
         , PREFIX_LIST    *prefix_list
         , LVP_CONTEXT    *context);
 # endif
+int LvpSetCtcScore(int score);
+int LvpGetCtcScore(void);
+
+
+void LvpInitMaxKws(void);
+int LvpDoMaxDecoder(LVP_CONTEXT *context);
+void LvpPrintMaxKwsList(void);
 
 int LvpDoGXDecoder(LVP_CONTEXT *context
                 , float *decoder_window1

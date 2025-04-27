@@ -17,16 +17,16 @@
 //=================================================================================================
 
 #ifndef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
-# define CONFIG_KWS_MODEL_OUTPUT_LENGTH          0
-# define CONFIG_KWS_MODEL_INPUT_WIN_LENGTH       0
-# define CONFIG_KWS_MODEL_FEATURES_DIM_PER_FRAME 0
-# define CONFIG_KWS_MODEL_DECODER_WIN_LENGTH     0
+# define CONFIG_KWS_MODEL_OUTPUT_LENGTH          65
+# define CONFIG_KWS_MODEL_INPUT_WIN_LENGTH       17
+# define CONFIG_KWS_MODEL_FEATURES_DIM_PER_FRAME 40
+# define CONFIG_KWS_MODEL_DECODER_WIN_LENGTH     23
 #ifdef CONFIG_DENOISE_SNPU_BUFFER_SIZE
 # define CONFIG_KWS_SNPU_BUFFER_SIZE CONFIG_DENOISE_SNPU_BUFFER_SIZE
 #elif (defined CONFIG_SED_SNPU_BUFFER_SIZE)
 # define CONFIG_KWS_SNPU_BUFFER_SIZE CONFIG_SED_SNPU_BUFFER_SIZE
 #else
-# define CONFIG_KWS_SNPU_BUFFER_SIZE             0
+# define CONFIG_KWS_SNPU_BUFFER_SIZE             2772
 #endif
 #endif
 
@@ -44,6 +44,18 @@
 
 #ifndef PCM_SAMPLE_RATE
 # error "Unknown Sample Rate"
+#endif
+
+#ifdef CONFIG_PCM_FRAME_LENGTH_1MS
+# define PCM_FRAME_LENGTH    1
+#endif
+
+#ifdef CONFIG_PCM_FRAME_LENGTH_2MS
+# define PCM_FRAME_LENGTH    2
+#endif
+
+#ifdef CONFIG_PCM_FRAME_LENGTH_4MS
+# define PCM_FRAME_LENGTH    4
 #endif
 
 #ifdef CONFIG_PCM_FRAME_LENGTH_10MS
