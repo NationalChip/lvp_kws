@@ -41,7 +41,7 @@
 
 ## 默认示例
 ### 中文编译：
-1. cp ./configs/grus_gx8002b_dev_erji_chinese.config .config
+1. cp ./configs/gitbub_grus_gx8002b_dev_erji_chinese.config .config
 2. make menuconfig
 3. 然后保存退出
 4. make clean;make
@@ -61,7 +61,7 @@
 ```
 
 ### 英文编译：
-1. cp ./configs/grus_gx8002b_dev_erji_english.config .config
+1. cp ./configs/github_grus_gx8002b_dev_erji_english.config .config
 2. make menuconfig
 3. 然后保存退出
 4. make clean;make
@@ -78,4 +78,17 @@
     9. volume down
     10. volume up
     ```
+
+### kwsModelAutoDeploy部署自己训练的模型编译：
+1. cd ./tools/kws_model_auto_deploy
+2. ./kwsModelAutoDeploy -i ./test_model -r /disk3/20250427_lvp_kws_github_bak_test/lvp_kws -p xiaoshu_aiot -dv v.0.1.0   #注意里面/disk3/20250427_lvp_kws_github_bak_test/lvp_kws修改为自己的真实路径
+3. 提示: 是否覆盖已有的 v.0.1.0 版本? y/n   选择 y
+4. make clean;make
+* 英文指令词列表：
+    ```
+    1. Hello Tina
+    ```
+
+
+
 
