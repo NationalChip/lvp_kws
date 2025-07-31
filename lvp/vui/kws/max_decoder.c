@@ -100,7 +100,6 @@ static int _LvpDoMaxScore(LVP_CONTEXT *context, int major)
     float *output = (float *)LvpCTCModelGetSnpuOutBuffer(context->snpu_buffer);
     int idx = s_max_index % CONFIG_KWS_MAX_DECODER_WIN_LENGTH;
 
-    s_max_index++;
     context->kws = 0;
     for (int i = 0; i < g_kws_list.count; i++) {
         int score = (int)(output[i] * 1000);
@@ -171,6 +170,7 @@ int LvpDoMaxDecoder(LVP_CONTEXT *context)
     if (ret != 0 && s_state == VUI_KWS_ACTIVE_STATE) {
         _LvpDoMaxScore(context, 0);
     }
+    s_max_index++;
     // 选择分差大来做最终激活词
     LVP_ACTIVATION_KWS *activation_kws = KwsStragegyRun(context);
     if (NULL != activation_kws) {
