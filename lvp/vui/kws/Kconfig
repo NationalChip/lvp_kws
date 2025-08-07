@@ -97,11 +97,11 @@ endif
 if LVP_ENABLE_MAX_DECODER
     config KWS_MAX_DECODER_WIN_LENGTH
         int "Max Decoder Determines The Active Window Length"
-        default 5
+        default 10
         range 5 20
     config MODEL_ACTIVATION_NUMBERS
         int "Max Decoder Activation Requires The Number of Model Activations"
-        default 2
+        default 1
         range 1 4
 endif
 

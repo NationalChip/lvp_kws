@@ -31,7 +31,6 @@
 
 #define LOG_TAG "[LVP_MAX_DECODE]"
 
-#define CONFIG_KWS_MAX_DECODER_WORDS_NUMBER 200
 #ifndef CONFIG_KWS_MAX_DECODER_WIN_LENGTH
 #define CONFIG_KWS_MAX_DECODER_WIN_LENGTH 10
 #endif
@@ -50,7 +49,7 @@ static int s_max_score = 0;
 static int s_max_index = 0;
 static LVP_KWS_PARAM_LIST g_kws_list;
 static VUI_KWS_STATE s_state = VUI_KWS_ACTIVE_STATE;
-static uint8_t *activation_flag[CONFIG_KWS_MAX_DECODER_WORDS_NUMBER] = {0};
+static uint8_t activation_flag[MODEL_OUTPUT_LENGTH] = {0};
 
 void ResetMaxWindow(void)
 {
@@ -95,13 +94,16 @@ int LvpGetVuiKwsStates(void)
 static int _LvpDoMaxScore(LVP_CONTEXT *context, int major)
 {
 #ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
-    memset(activation_flag, 0, g_kws_list.count * sizeof(uint8_t));
+    memset(activation_flag, 0, MODEL_OUTPUT_LENGTH * sizeof(uint8_t));
     gx_dcache_invalid_range((unsigned int *)context->snpu_buffer, context->ctx_header->snpu_buffer_size);
     float *output = (float *)LvpCTCModelGetSnpuOutBuffer(context->snpu_buffer);
     int idx = s_max_index % CONFIG_KWS_MAX_DECODER_WIN_LENGTH;
 
     context->kws = 0;
     for (int i = 0; i < g_kws_list.count; i++) {
+        // 过滤掉当前非major激活词
+        if ((g_kws_list.kws_param_list[i].major & 0x1) != major) continue;
+
         int score = (int)(output[i] * 1000);
 
 #ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
@@ -129,8 +131,14 @@ static int _LvpDoMaxScore(LVP_CONTEXT *context, int major)
 
         if ((score > threshold) && ((g_kws_list.kws_param_list[i].major & 0x1) == major)) {
             printf (LOG_TAG"Greater than the score threshold! th:%d,S:%d,D:%d\n", threshold, score, score - threshold);
+
+#ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
             if (s_max_score < score && activation_flag[i] <= CONFIG_MODEL_ACTIVATION_NUMBERS)
                 s_max_score = score;
+#else
+            s_max_score = score;
+#endif
+
             s_max_decoder_window[idx][i] = 1;
             for (int j = 0; j < CONFIG_KWS_MAX_DECODER_WIN_LENGTH; j ++) {
                 activation_flag[i] += s_max_decoder_window[j][i];
@@ -148,8 +156,8 @@ static int _LvpDoMaxScore(LVP_CONTEXT *context, int major)
                 if (g_kws_list.kws_param_list[i].major)
                     KwsStrategyClearBunkwsThresholdOffset();
 #ifdef CONFIG_ENABLE_CTC_KWS_AND_BUN_KWS_CASCADE
-                ResetCtcWinodw();
-                return g_kws_list.kws_param_list[i].kws_value;
+                    ResetCtcWinodw();
+                    return g_kws_list.kws_param_list[i].kws_value;
 #endif
             }
         }
@@ -157,7 +165,7 @@ static int _LvpDoMaxScore(LVP_CONTEXT *context, int major)
             s_max_decoder_window[idx][i] = 0;
         }
     }
-    return -1;
+    return 0;
 #else
     return 0;
 #endif
@@ -167,7 +175,7 @@ int LvpDoMaxDecoder(LVP_CONTEXT *context)
 {
 #ifdef CONFIG_LVP_ENABLE_KEYWORD_RECOGNITION
     int ret = _LvpDoMaxScore(context, 1);
-    if (ret != 0 && s_state == VUI_KWS_ACTIVE_STATE) {
+    if (s_state == VUI_KWS_ACTIVE_STATE) {
         _LvpDoMaxScore(context, 0);
     }
     s_max_index++;
@@ -184,7 +192,7 @@ int LvpDoMaxDecoder(LVP_CONTEXT *context)
 
 void LvpInitMaxKws(void)
 {
-    if (CONFIG_KWS_MAX_DECODER_WORDS_NUMBER < g_kws_list.count)
+    if (MODEL_OUTPUT_LENGTH != g_kws_list.count)
         printf(LOG_TAG "==ERROR== The activation_flag space is too small\n");
 
     KwsStrategyInit();
