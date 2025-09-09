@@ -57,6 +57,9 @@ class BasicDeployment:
                     "model_data":{}
         }
 
+        #添加模型步进
+
+
         #项目名称
         parsed_model_data["project name"] = self.internal_msg_bus['项目名称']
         #模型版本
@@ -84,6 +87,10 @@ class BasicDeployment:
 
         parsed_model_data["supportSoftMax"] = support_SoftMax
         parsed_model_data["normal_ctc"] = normal_ctc
+
+        if self.internal_msg_bus["模型信息"]["input_stride"]:
+            parsed_model_data["stride"] = self.internal_msg_bus["模型信息"]["input_stride"]
+
         ppint_data = copy.deepcopy(parsed_model_data)
         ppint_data["model_data"]["res"] = "模型文件数据,过大暂不展开 ..."
         self.logger.log(ppint_data, "debug")
@@ -103,9 +110,13 @@ class BasicDeployment:
             返回值:
                     *
         """
+        create_lvp_package_map = {"bunkws": self.create_lvp_package.CreateBunKwsAcousticModelPackage,
+                "alchemy": self.create_lvp_package.CreateAlchemyAcousticModelPackage}
         if self.internal_msg_bus['SDK 类型']=="LVP":
-            self.create_lvp_package.CreateLVPAcousticModelPackage(
-                    self.parsed_all_models_info[self.internal_msg_bus["模型自定义部署版本"]])
+            create_lvp_package_map.get(self.internal_msg_bus["部署模式"].lower())(
+                        self.parsed_all_models_info[self.internal_msg_bus["模型自定义部署版本"]])
+            #self.create_lvp_package.CreateLVPAcousticModelPackage(
+            #        self.parsed_all_models_info[self.internal_msg_bus["模型自定义部署版本"]])
         else:
             self.logger.log("[BasicDeployment]: 错误! { self.internal_msg_bus['SDK 类型']} SDK 暂不支持部署", "error")
 
