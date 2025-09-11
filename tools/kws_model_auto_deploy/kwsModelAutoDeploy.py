@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 
 
-__version__ = "v2.0.0"
+__version__ = "v2.0.1"
 
 
 import argparse, sys, os, pprint
@@ -195,7 +195,7 @@ def func_AlchemyDeploymentMode(args):
 
 ###################################################################################
 def main():
-    update_time = "Update time: 2025-08-28\nauthor: liushk"
+    update_time = "Update time: 2025-09-11\nauthor: liushk"
     version_info = "\nversion: " + str(__version__) + "\n" + update_time
     tool_description = "这是一个可以把 Kws 模型训练框架生成的模型，自动部署到 lvp SDK 内的工具"
     parser = argparse.ArgumentParser(description=tool_description, formatter_class=argparse.RawTextHelpFormatter)

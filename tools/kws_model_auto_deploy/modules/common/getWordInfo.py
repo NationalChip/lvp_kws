@@ -44,13 +44,21 @@ class GetWordsConfig:
             返回值:
                     * dict: 词信息字典
         """
+        if self.internal_msg_bus["部署模式"].lower() in ["bunkws"]:
+            try:
+                self.logger.log(f'GetWordsConfig]: 调试! 部署模式: {self.internal_msg_bus["部署模式"]} 词信息: {pprint.pformat(self.words_info)}', "debug")
+                self.internal_msg_bus["词信息"] = self.words_info
+                return True
+            except Exception as e:
+                self.logger.log(f"[GetWordsConfig]: 错误! 词信息获取失败: {e}", "error")
+                return False
         try:
             for index in self.words_info:
                 cmd = self.words_info[index]["词"]
                 #print("索引:", index)
                 #print(self.words_info[index])
                 #print("词", cmd)
-                assert is_all_chinese(cmd), '指令词包含非中文字符, 请检查'
+                assert is_all_chinese(cmd), '指令词包含非中文字符, 请检查. 注意: Alchemy 模型不支持英文'
                 sym_labels, sym_label_id, syllable_labels, syllable_label_id, sym_tone_labels, sym_tone_label_id = get_yinjie_label(cmd)
                 if acoustic_model_info["modeling_unit"] == 65:
                     label_id = sym_label_id
@@ -66,21 +74,19 @@ class GetWordsConfig:
                     self.words_info[index]["label_length"] = len(label_id)
                 self.words_info[index]["词拼音"] = " ".join(lazy_pinyin(cmd))
             self.internal_msg_bus["词信息"] = self.words_info
-
-            if self.internal_msg_bus["部署模式"].lower() == "alchemy":
-                self.logger.log("[GetWordsConfig]: 提示! 开始词分组", "info")
-                set_groups = SetGroups(self.internal_msg_bus, self.logger)
-                self.internal_msg_bus["分组信息"] = set_groups.StartSetGroups()
-                #根据分组，重新排序
-                output_dict = {}
-                for index in self.internal_msg_bus["词信息"]:
-                    new_index = self.internal_msg_bus["分组信息"]["分组列表"].index(self.internal_msg_bus["词信息"][index]["词"])
-                    output_dict[new_index] = self.internal_msg_bus["词信息"][index]
-                self.internal_msg_bus["词信息"] = output_dict
+            self.logger.log("[GetWordsConfig]: 提示! 开始词分组", "info")
+            set_groups = SetGroups(self.internal_msg_bus, self.logger)
+            self.internal_msg_bus["分组信息"] = set_groups.StartSetGroups()
+            #根据分组，重新排序
+            output_dict = {}
+            for index in self.internal_msg_bus["词信息"]:
+                new_index = self.internal_msg_bus["分组信息"]["分组列表"].index(self.internal_msg_bus["词信息"][index]["词"])
+                output_dict[new_index] = self.internal_msg_bus["词信息"][index]
+            self.internal_msg_bus["词信息"] = output_dict
         except Exception as e:
-            self.logger.log(f"[GetWordsConfig]: 调试! 词信息获取失败: {e}", "error")
+            self.logger.log(f"[GetWordsConfig]: 错误! 词信息获取失败: {e}", "error")
             return False
-        self.logger.log(f"[GetWordsConfig]: 调试! 词信息: {pprint.pformat(self.internal_msg_bus['词信息'])}", "debug")
+        self.logger.log(f'GetWordsConfig]: 调试! 部署模式: {self.internal_msg_bus["部署模式"]} 词信息: {pprint.pformat(self.internal_msg_bus["词信息"])}', "debug")
         return True
 
 
